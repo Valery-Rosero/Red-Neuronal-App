@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Regenerable por el notebook (46 MB)
+artefactos/datos_ventanas.joblib
+
+# Material del curso
+Taller_lstm2026_2.pdf
+
+# Vercel
+.vercel/

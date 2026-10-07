@@ -1,0 +1,50 @@
+{
+  "modelo": "A_w12",
+  "arquitectura": "A · LSTM base",
+  "ventana": 12,
+  "features": [
+    "demanda_mw",
+    "temperatura_c",
+    "humedad_pct",
+    "viento_kmh",
+    "radiacion_wm2",
+    "precipitacion_mm",
+    "precio_kwh",
+    "hora_sin",
+    "hora_cos",
+    "dia_sin",
+    "dia_cos",
+    "mes_sin",
+    "mes_cos",
+    "fin_semana",
+    "festivo"
+  ],
+  "escalador": {
+    "media": {
+      "demanda_mw": 632.3764435009797,
+      "temperatura_c": 18.82048910371948,
+      "humedad_pct": 72.20659076015728,
+      "viento_kmh": 11.033549602686984,
+      "radiacion_wm2": 201.89107387475536,
+      "precipitacion_mm": 0.9535037508153947,
+      "precio_kwh": 24.62152531313958
+    },
+    "std": {
+      "demanda_mw": 97.08132717534626,
+      "temperatura_c": 5.585588252943009,
+      "humedad_pct": 14.793078952805981,
+      "viento_kmh": 4.70253259987955,
+      "radiacion_wm2": 257.08398682457357,
+      "precipitacion_mm": 2.0852625511808096,
+      "precio_kwh": 5.406925364755868
+    },
+    "y_media": 632.4287956621005,
+    "y_std": 96.89076831605476
+  },
+  "metricas_prueba": {
+    "MAE": 19.856540695660016,
+    "RMSE": 24.991616708893215,
+    "MAPE": 3.4289498140281878,
+    "R²": 0.9037199022694633
+  }
+}

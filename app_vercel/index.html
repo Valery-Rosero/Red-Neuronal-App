@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Predicción de Demanda LSTM</title>
+  <meta name="description" content="Predicción de la demanda eléctrica de la siguiente hora con una red LSTM a partir de 12 horas de variables multivariadas.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="cabecera">
+    <div class="contenedor">
+      <p class="eyebrow">Taller · Inteligencia Artificial</p>
+      <h1>Predicción de demanda eléctrica con LSTM</h1>
+      <p class="lead">Ingresa las variables de las últimas <strong id="txt-ventana">12</strong> horas (x) y el modelo predice la demanda de la <strong>hora siguiente</strong> (y).</p>
+      <div class="chips" id="chips-modelo" aria-label="Métricas del modelo en prueba">
+        <span class="chip chip-cargando">Cargando modelo…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <!-- 1. ENTRADAS -->
+    <section class="tarjeta" aria-labelledby="t-entradas">
+      <div class="tarjeta-cab">
+        <h2 id="t-entradas"><span class="num">1</span> Variables de entrada (x)</h2>
+        <div class="tabs" role="tablist">
+          <button role="tab" class="tab activo" data-modo="historico" aria-selected="true">Desde el histórico</button>
+          <button role="tab" class="tab" data-modo="manual" aria-selected="false">Ingreso manual / CSV</button>
+        </div>
+      </div>
+
+      <div class="controles">
+        <label class="campo">
+          <span>Última hora observada (t)</span>
+          <input type="datetime-local" id="inp-t" step="3600">
+        </label>
+        <div class="grupo-botones" data-solo="historico">
+          <button class="btn" id="btn-cargar">Cargar 12 horas</button>
+          <button class="btn btn-sec" id="btn-aleatorio" title="Instante aleatorio del periodo de prueba (sept-dic 2026), que el modelo nunca vio">Aleatorio (prueba)</button>
+        </div>
+        <div class="grupo-botones oculto" data-solo="manual">
+          <button class="btn btn-sec" id="btn-plantilla">Tabla vacía</button>
+          <label class="btn btn-sec" for="inp-csv">Subir CSV</label>
+          <input type="file" id="inp-csv" accept=".csv,text/csv" hidden>
+          <button class="btn btn-sec" id="btn-descargar">Descargar CSV</button>
+        </div>
+      </div>
+      <p class="ayuda" id="ayuda-modo">Elige un instante del histórico (2025-2026). Puedes editar cualquier valor de la tabla antes de predecir.</p>
+
+      <div class="tabla-scroll">
+        <table class="tabla" id="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Fecha y hora</th>
+              <th scope="col">Día</th>
+              <th scope="col">Demanda<br><small>MW</small></th>
+              <th scope="col">Temp.<br><small>°C</small></th>
+              <th scope="col">Humedad<br><small>%</small></th>
+              <th scope="col">Viento<br><small>km/h</small></th>
+              <th scope="col">Radiación<br><small>W/m²</small></th>
+              <th scope="col">Precip.<br><small>mm</small></th>
+              <th scope="col">Precio<br><small>kWh</small></th>
+              <th scope="col">Festivo</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <details class="escenario">
+        <summary>Ajustes rápidos de escenario</summary>
+        <div class="escenario-cuerpo">
+          <label class="campo">
+            <span>Sumar a la temperatura: <output id="out-dt">0</output> °C</span>
+            <input type="range" id="rng-dt" min="-8" max="8" step="0.5" value="0">
+          </label>
+          <label class="campo">
+            <span>Escalar la radiación: <output id="out-rad">100</output> %</span>
+            <input type="range" id="rng-rad" min="0" max="150" step="5" value="100">
+          </label>
+          <div class="grupo-botones">
+            <button class="btn btn-sec" id="btn-aplicar">Aplicar a las 12 horas</button>
+            <button class="btn btn-sec" id="btn-festivo">Marcar todo festivo</button>
+            <button class="btn btn-sec" id="btn-restaurar">Restaurar</button>
+          </div>
+          <p class="ayuda">Útil para ver cómo responde la predicción a un día más caluroso, nublado o festivo.</p>
+        </div>
+      </details>
+
+      <div id="errores" class="errores oculto" role="alert"></div>
+
+      <button class="btn btn-primario" id="btn-predecir">Predecir demanda de la hora siguiente</button>
+    </section>
+
+    <!-- 2. RESULTADO -->
+    <section class="tarjeta" aria-labelledby="t-resultado" id="sec-resultado">
+      <h2 id="t-resultado"><span class="num">2</span> Predicción (y)</h2>
+      <div id="resultado-vacio" class="vacio">La predicción aparecerá aquí.</div>
+      <div id="resultado" class="oculto">
+        <div class="kpis">
+          <div class="kpi kpi-principal">
+            <span class="kpi-etq">Demanda predicha · <span id="r-hora"></span></span>
+            <span class="kpi-val"><span id="r-pred">—</span> <small>MW</small></span>
+            <span class="kpi-sub">Rango típico ± <span id="r-rmse"></span> MW (RMSE en prueba)</span>
+          </div>
+          <div class="kpi" id="kpi-real">
+            <span class="kpi-etq">Demanda real (histórico)</span>
+            <span class="kpi-val"><span id="r-real">—</span> <small>MW</small></span>
+            <span class="kpi-sub" id="r-error"></span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-etq">Cambio vs. hora actual</span>
+            <span class="kpi-val"><span id="r-delta">—</span> <small>MW</small></span>
+            <span class="kpi-sub" id="r-delta-pct"></span>
+          </div>
+        </div>
+        <div class="grafica">
+          <canvas id="grafica" aria-label="Demanda de las últimas horas y predicción de la siguiente" role="img"></canvas>
+        </div>
+        <details class="tabla-vista">
+          <summary>Ver datos de la gráfica</summary>
+          <div class="tabla-scroll"><table class="tabla tabla-mini" id="tabla-grafica"></table></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="tarjeta nota">
+      <h2>Sobre el modelo</h2>
+      <ul>
+        <li><strong>Arquitectura:</strong> <span id="m-arq">LSTM base</span>, entrenada con datos de <span id="m-periodo">2025-2026</span>. Seleccionada por su error en validación frente a una LSTM profunda y una CNN-LSTM.</li>
+        <li><strong>Entradas por hora (15):</strong> demanda, temperatura, humedad, viento, radiación, precipitación y precio (normalizados con parámetros de entrenamiento); hora, día y mes en codificación seno/coseno (se calculan de la fecha); fin de semana (de la fecha) y festivo.</li>
+        <li><strong>Sin valores inventados:</strong> si una hora tiene un dato faltante o fuera de rango físico, la app lo señala y no predice, igual que en el entrenamiento.</li>
+        <li><strong>Limitaciones:</strong> predice solo una hora adelante; en festivos el error típico es casi el doble.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="contenedor pie">Taller LSTM · Predicción de demanda energética · Inferencia en <code>/api/predict</code></footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
