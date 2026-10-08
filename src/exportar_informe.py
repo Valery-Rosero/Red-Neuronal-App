@@ -41,7 +41,8 @@ def construir():
     nb = nbformat.read(os.path.join(RAIZ, "Taller_LSTM.ipynb"), as_version=4)
     os.makedirs(FIG_DIR, exist_ok=True)
     for f in os.listdir(FIG_DIR):
-        os.remove(os.path.join(FIG_DIR, f))
+        if f.startswith("fig_"):
+            os.remove(os.path.join(FIG_DIR, f))
 
     cuerpo, toc, n_fig = [], [], 0
     titulo_actual = ""

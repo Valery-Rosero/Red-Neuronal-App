@@ -2,6 +2,12 @@
 
 Taller de Inteligencia Artificial: diseño, comparación y despliegue de arquitecturas LSTM que predicen la demanda eléctrica (MW) de la **hora siguiente** a partir de una ventana de *n* horas de información multivariada (demanda, clima, precio y calendario).
 
+## Informe
+
+📄 **[Informe_Taller_LSTM.pdf](Informe_Taller_LSTM.pdf)**: informe completo del taller (portada, metodología, resultados, gráficas, preguntas de análisis y conclusiones). También se puede ver y exportar a PDF desde la app: https://red-neuronal-app.vercel.app/reporte.html
+
+**Autores:** Valery Nickol Rosero Molina y Johan David Delgado · **Docente:** Cristian Ordoñez
+
 ## Resultados
 
 Evaluación sobre el conjunto de prueba (13-sep a 31-dic-2026, nunca visto en entrenamiento), con los mismos instantes para todos los modelos:
@@ -24,12 +30,16 @@ La tabla completa (3 arquitecturas × ventanas de 12, 24 y 48 h), las gráficas,
 │   ├── preprocessing.py         # Limpieza, variables cíclicas, split cronológico, escalado y ventanas
 │   ├── modelos.py               # Arquitecturas A (LSTM base), B (LSTM profunda) y C (CNN-LSTM)
 │   ├── exportar_modelo.py       # Exporta el modelo a JSON para la app y verifica Keras vs. NumPy
-│   └── exportar_informe.py      # Genera la página de resultados de la app desde el notebook
+│   ├── exportar_informe.py      # Genera la página de resultados de la app desde el notebook
+│   └── generar_reporte.py       # Genera el informe formal (reporte.html) y su PDF
+├── reporte/                     # Texto (contenido.md) y plantilla del informe
+├── Informe_Taller_LSTM.pdf      # Informe en PDF
 ├── modelos/                     # Modelos entrenados (.keras) y modelo_produccion.keras
 ├── artefactos/                  # Historiales, experimentos, dataset limpio y configuración
 └── app_vercel/                  # App web desplegable en Vercel
     ├── index.html, app.js, styles.css
     ├── informe.html, informe/   # Página de resultados y análisis (gráficas + preguntas)
+    ├── reporte.html             # Informe formal con opción de exportar a PDF
     ├── historico.csv            # Histórico limpio para el modo "desde el histórico"
     ├── api/predict.py           # Función serverless: POST /api/predict
     ├── api/_motor.py            # Validación + LSTM en NumPy
@@ -53,6 +63,7 @@ Por defecto (`REENTRENAR = False`) el notebook carga los modelos ya entrenados d
 La app tiene dos páginas:
 
 - **Predicción:** permite ingresar las variables independientes (x) de las últimas 12 horas (desde el histórico, a mano o subiendo un CSV) y ver la predicción de la demanda de la hora siguiente (y).
+- **Informe** (`reporte.html`): el informe formal con portada, listo para descargar o imprimir en PDF.
 - **Resultados y análisis** (`informe.html`): muestra la limpieza de datos, las arquitecturas, la tabla de resultados, todas las gráficas, el análisis de sobreajuste, los experimentos, las respuestas a las 9 preguntas y las conclusiones. Se genera desde el notebook ejecutado con `python src/exportar_informe.py`.
 
 - **Validación estricta:** si una hora tiene un dato faltante o fuera de rango físico, la app lo señala y no predice. Aplica las mismas reglas de limpieza del entrenamiento y no inventa valores.

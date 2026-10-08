@@ -155,7 +155,9 @@ input[type="range"] { accent-color: var(--acento); width: 100%; }
 .nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--fondo) 88%, transparent);
   backdrop-filter: blur(8px); border-bottom: 1px solid var(--borde); }
 .nav-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
-.marca { font-weight: 700; font-size: .95rem; white-space: nowrap; }
+.marca { font-weight: 700; font-size: .95rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;
+  color: var(--tinta); text-decoration: none; }
+.marca-ico { color: var(--acento); flex: none; }
 .nav-links { display: flex; gap: 4px; overflow-x: auto; }
 .nav-links a { color: var(--tinta-2); text-decoration: none; font-size: .88rem; padding: 6px 12px; border-radius: 8px; white-space: nowrap; }
 .nav-links a:hover { background: var(--superficie-2); color: var(--tinta); }
@@ -199,4 +201,4 @@ figure.lamina { margin-left: 0; margin-right: 0; }
   .toc-titulo { display: none; }
   .toc a { white-space: nowrap; border: 1px solid var(--borde); border-radius: 999px; }
 }
-@media (max-width: 480px) { .marca-txt { display: none; } .nav-links a { padding: 6px 10px; } }
+@media (max-width: 480px) { .marca-txt { display: none; } .nav-links a { padding: 6px 8px; font-size: .8rem; } }

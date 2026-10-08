@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Informe Taller LSTM</title>
+  <meta name="description" content="Informe del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .barra-doc { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 24px auto 16px; max-width: 860px; }
+    .barra-doc p { margin: 0; color: var(--tinta-2); font-size: .9rem; }
+    .barra-doc .grupo-botones a { text-decoration: none; }
+    .ico-btn { width: 16px; height: 16px; margin-right: 6px; flex: none; }
+
+    /* ---------- hoja ---------- */
+    .papel {
+      background: #fff; color: #1b1b1a; max-width: 860px; margin: 0 auto 40px; border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 10px 40px rgba(0,0,0,.08); border: 1px solid var(--borde);
+      font-family: "Source Serif 4", Georgia, serif; font-size: 11.5pt; line-height: 1.6;
+    }
+    .papel section, .papel .portada, .papel .indice { padding: 56px 64px; }
+    .papel h1, .papel h2, .papel h3, .papel th, .papel figcaption, .papel .tabla-cap, .papel .portada { font-family: "Inter", system-ui, sans-serif; }
+    .papel h2 { font-size: 17pt; color: #0b0b0b; margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #2a78d6; letter-spacing: -.01em; display: block; }
+    .papel h3 { font-size: 12.5pt; color: #0b0b0b; margin: 22px 0 6px; }
+    .papel p, .papel li { color: #262624; text-align: justify; hyphens: auto; }
+    .papel strong { color: #0b0b0b; }
+    .papel a { color: #1c5cab; word-break: normal; overflow-wrap: break-word; hyphens: none; }
+    .papel table.datos td:first-child { white-space: nowrap; }
+    .papel table.datos.envolver td:first-child { white-space: normal; min-width: 150px; }
+    .papel table.datos th { white-space: nowrap; }
+    .papel code { font-size: .85em; background: #f0efec; color: #0b0b0b; padding: .05em .3em; border-radius: 3px; }
+    .papel table { width: 100%; border-collapse: collapse; font-size: 9.5pt; line-height: 1.4; margin: 10px 0 6px; font-family: "Inter", sans-serif; }
+    .papel th { background: #eaf2fd; color: #0b0b0b; text-align: left; font-weight: 600; padding: 6px 8px; border-bottom: 1.5px solid #2a78d6; }
+    .papel td { padding: 5px 8px; border-bottom: 1px solid #e2e1dc; vertical-align: top; color: #262624; }
+    .papel td.n, .papel th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .papel tr.destacado td { background: #f3f8fe; font-weight: 600; color: #0b0b0b; }
+    .papel tr.referencia td { color: #6b6a66; font-style: italic; }
+    .papel figure { margin: 18px 0; text-align: center; }
+    .papel figure img { max-width: 100%; height: auto; border: 1px solid #ecebe7; border-radius: 4px; }
+    .papel figcaption, .papel .tabla-cap { font-size: 8.8pt; color: #52514e; margin-top: 6px; text-align: left; line-height: 1.45; }
+    .papel .tabla-cap { margin: 14px 0 0; }
+    .papel .tabla-wrap { overflow-x: auto; }
+
+    /* ---------- portada ---------- */
+    .portada { min-height: 1050px; display: flex; flex-direction: column; justify-content: space-between; color: #0b0b0b; position: relative; }
+    .portada .franja { position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: linear-gradient(#2a78d6, #1baf7a); border-radius: 6px 0 0 6px; }
+    .portada .sup { display: flex; align-items: center; gap: 12px; font-size: 10pt; color: #52514e; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+    .portada .sup svg { color: #2a78d6; }
+    .portada .centro { margin: auto 0; padding: 40px 0; }
+    .portada .tipo { color: #2a78d6; font-weight: 600; font-size: 11pt; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 14px; }
+    .portada h1 { font-size: 30pt; line-height: 1.12; letter-spacing: -.025em; margin: 0 0 18px; color: #0b0b0b; }
+    .portada .sub { font-size: 13pt; color: #52514e; max-width: 560px; margin: 0; font-family: "Source Serif 4", serif; text-align: left; }
+    .portada .curva { margin: 36px 0 0; width: 100%; height: 90px; }
+    .portada .datos { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 32px; border-top: 1px solid #e2e1dc; padding-top: 28px; }
+    .portada .datos .et { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .1em; color: #898781; font-weight: 600; margin-bottom: 4px; }
+    .portada .datos .va { font-size: 11.5pt; font-weight: 500; color: #0b0b0b; line-height: 1.5; }
+    .portada .datos .va a { color: #1c5cab; font-weight: 500; }
+    .portada .datos .ancho { grid-column: 1 / -1; }
+
+    /* ---------- índice ---------- */
+    .indice h2 { margin-top: 0; }
+    .indice ol { list-style: none; padding: 0; margin: 0; columns: 1; }
+    .indice li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dotted #d6d5d0; font-family: "Inter", sans-serif; font-size: 10.5pt; }
+    .indice li a { color: #0b0b0b; text-decoration: none; word-break: normal; }
+    .indice li a:hover { color: #2a78d6; }
+
+    @media (max-width: 700px) {
+      .papel section, .papel .portada, .papel .indice { padding: 28px 20px; }
+      .portada { min-height: auto; }
+      .portada h1 { font-size: 22pt; }
+      .portada .datos { grid-template-columns: 1fr; }
+      .papel p, .papel li { text-align: left; }
+    }
+
+    /* ---------- impresión / PDF ---------- */
+    @page { size: A4; margin: 18mm 17mm 20mm; }
+    @media print {
+      :root { color-scheme: light; }
+      body { background: #fff !important; }
+      .nav, .barra-doc, .pie { display: none !important; }
+      .contenedor { padding: 0; max-width: none; }
+      .papel { box-shadow: none; border: 0; margin: 0; max-width: none; border-radius: 0; font-size: 10.5pt; }
+      .papel section, .papel .indice { padding: 0; }
+      .portada { padding: 0 0 0 18px !important; min-height: 255mm; height: 255mm; break-after: page; }
+      .portada .franja { border-radius: 0; left: -2px; }
+      .indice { break-after: page; }
+      .papel h2 { margin-top: 0; padding-top: 2mm; }
+      .papel section + section { margin-top: 8mm; }
+      .papel section.nueva-pagina { break-before: page; margin-top: 0; }
+      .papel h2, .papel h3 { break-after: avoid; }
+      .papel figure, .papel table, .papel .tabla-cap { break-inside: avoid; }
+      .papel .tabla-cap { break-after: avoid; }
+      .papel figure img { max-height: 180mm; }
+      .papel table { font-size: 8.8pt; }
+      .papel .tabla-wrap { overflow: visible; }
+      .papel a { color: #1c5cab; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="contenedor nav-in">
+      <a class="marca" href="./"><svg class="marca-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect width="24" height="24" rx="6" fill="currentColor"/><path d="M13.2 4.5 7 13.2h4.4l-.9 6.3 6.3-8.9h-4.5z" fill="#fff"/></svg><span class="marca-txt">Demanda LSTM</span></a>
+      <div class="nav-links">
+        <a href="./">Predicción</a>
+        <a href="informe.html">Resultados y análisis</a>
+        <a href="reporte.html" class="activo" aria-current="page">Informe</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="contenedor">
+    <div class="barra-doc">
+      <p>Informe completo del taller, listo para entregar.</p>
+      <div class="grupo-botones">
+        <a class="btn" href="Informe_Taller_LSTM.pdf" download>
+          <svg class="ico-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Descargar PDF</a>
+        <button class="btn btn-sec" onclick="window.print()">
+          <svg class="ico-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg>Imprimir / guardar como PDF</button>
+      </div>
+    </div>
+
+    <article class="papel">
+      <div class="portada">
+        <div class="franja"></div>
+        <div class="sup">
+          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="currentColor"/><path d="M13.2 4.5 7 13.2h4.4l-.9 6.3 6.3-8.9h-4.5z" fill="#fff"/></svg>
+          Inteligencia Artificial
+        </div>
+        <div class="centro">
+          <p class="tipo">Informe de taller</p>
+          <h1>Diseño de una arquitectura LSTM para predicción de demanda energética</h1>
+          <p class="sub">Diseño, implementación, comparación y despliegue de redes neuronales LSTM para predecir la demanda eléctrica de la hora siguiente a partir de información histórica multivariada.</p>
+          {{CURVA}}
+        </div>
+        <div class="datos">
+          <div class="ancho"><div class="et">Presentado por</div><div class="va">Valery Nickol Rosero Molina<br>Johan David Delgado</div></div>
+          <div><div class="et">Docente</div><div class="va">Cristian Ordoñez</div></div>
+          <div><div class="et">Fecha</div><div class="va">{{FECHA}}</div></div>
+          <div class="ancho"><div class="et">Repositorio del proyecto (GitHub)</div><div class="va"><a href="{{REPO}}">{{REPO}}</a></div></div>
+          <div class="ancho"><div class="et">Aplicación web</div><div class="va"><a href="{{APP}}">{{APP}}</a></div></div>
+        </div>
+      </div>
+
+      <div class="indice">
+        <h2>Contenido</h2>
+        <ol>{{INDICE}}</ol>
+      </div>
+
+      {{CUERPO}}
+    </article>
+  </div>
+
+  <footer class="contenedor pie">Taller LSTM · Valery Nickol Rosero Molina y Johan David Delgado · <a href="{{REPO}}">Repositorio en GitHub</a></footer>
+</body>
+</html>
