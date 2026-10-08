@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resultados y Análisis LSTM</title>
+  <meta name="description" content="Limpieza de datos, arquitecturas, métricas, gráficas, análisis de sobreajuste y respuestas a las preguntas del taller de LSTM para demanda eléctrica.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="contenedor nav-in">
+      <span class="marca">⚡ <span class="marca-txt">Demanda LSTM</span></span>
+      <div class="nav-links">
+        <a href="./">Predicción</a>
+        <a href="informe.html" class="activo" aria-current="page">Resultados y análisis</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="cabecera">
+    <div class="contenedor">
+      <p class="eyebrow">Taller · Inteligencia Artificial</p>
+      <h1>Resultados y análisis</h1>
+      <p class="lead">El proceso completo del taller: limpieza de datos, diseño y entrenamiento de las tres arquitecturas LSTM con ventanas de 12, 24 y 48 h, métricas, gráficas, análisis de sobreajuste y respuestas a las preguntas. Todo el contenido se generó a partir del notebook ejecutado.</p>
+      <div class="chips">
+        <a class="chip chip-link" href="#12-preguntas-de-análisis">Ir a las preguntas de análisis →</a>
+        <a class="chip chip-link" href="#7-evaluación-sobre-el-conjunto-de-prueba">Tabla de resultados</a>
+        <a class="chip chip-link" href="#8-gráficas">Gráficas</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor informe-grid">
+    <aside class="toc" aria-label="Contenido">
+      <p class="toc-titulo">Contenido</p>
+      {{TOC}}
+    </aside>
+    <main class="informe">
+      {{CUERPO}}
+    </main>
+  </div>
+
+  <footer class="contenedor pie">Taller LSTM · Predicción de demanda energética · <a href="./">Probar el modelo</a></footer>
+</body>
+</html>

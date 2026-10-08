@@ -23,11 +23,13 @@ La tabla completa (3 arquitecturas × ventanas de 12, 24 y 48 h), las gráficas,
 ├── src/
 │   ├── preprocessing.py         # Limpieza, variables cíclicas, split cronológico, escalado y ventanas
 │   ├── modelos.py               # Arquitecturas A (LSTM base), B (LSTM profunda) y C (CNN-LSTM)
-│   └── exportar_modelo.py       # Exporta el modelo a JSON para la app y verifica Keras vs. NumPy
+│   ├── exportar_modelo.py       # Exporta el modelo a JSON para la app y verifica Keras vs. NumPy
+│   └── exportar_informe.py      # Genera la página de resultados de la app desde el notebook
 ├── modelos/                     # Modelos entrenados (.keras) y modelo_produccion.keras
 ├── artefactos/                  # Historiales, experimentos, dataset limpio y configuración
 └── app_vercel/                  # App web desplegable en Vercel
     ├── index.html, app.js, styles.css
+    ├── informe.html, informe/   # Página de resultados y análisis (gráficas + preguntas)
     ├── historico.csv            # Histórico limpio para el modo "desde el histórico"
     ├── api/predict.py           # Función serverless: POST /api/predict
     ├── api/_motor.py            # Validación + LSTM en NumPy
@@ -46,7 +48,12 @@ Por defecto (`REENTRENAR = False`) el notebook carga los modelos ya entrenados d
 
 ## App web
 
-La app permite ingresar las variables independientes (x) de las últimas 12 horas (desde el histórico, a mano o subiendo un CSV) y ver la predicción de la demanda de la hora siguiente (y).
+**En línea:** https://red-neuronal-app.vercel.app
+
+La app tiene dos páginas:
+
+- **Predicción:** permite ingresar las variables independientes (x) de las últimas 12 horas (desde el histórico, a mano o subiendo un CSV) y ver la predicción de la demanda de la hora siguiente (y).
+- **Resultados y análisis** (`informe.html`): muestra la limpieza de datos, las arquitecturas, la tabla de resultados, todas las gráficas, el análisis de sobreajuste, los experimentos, las respuestas a las 9 preguntas y las conclusiones. Se genera desde el notebook ejecutado con `python src/exportar_informe.py`.
 
 - **Validación estricta:** si una hora tiene un dato faltante o fuera de rango físico, la app lo señala y no predice. Aplica las mismas reglas de limpieza del entrenamiento y no inventa valores.
 - **Inferencia sin TensorFlow:** los pesos de la LSTM se exportan a JSON y el paso hacia adelante se calcula con NumPy, para cumplir el límite de tamaño de las funciones serverless. La diferencia con Keras es menor a 0.01 MW.

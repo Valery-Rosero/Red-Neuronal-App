@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resultados y Análisis LSTM</title>
+  <meta name="description" content="Limpieza de datos, arquitecturas, métricas, gráficas, análisis de sobreajuste y respuestas a las preguntas del taller de LSTM para demanda eléctrica.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="contenedor nav-in">
+      <span class="marca">⚡ <span class="marca-txt">Demanda LSTM</span></span>
+      <div class="nav-links">
+        <a href="./">Predicción</a>
+        <a href="informe.html" class="activo" aria-current="page">Resultados y análisis</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="cabecera">
+    <div class="contenedor">
+      <p class="eyebrow">Taller · Inteligencia Artificial</p>
+      <h1>Resultados y análisis</h1>
+      <p class="lead">El proceso completo del taller: limpieza de datos, diseño y entrenamiento de las tres arquitecturas LSTM con ventanas de 12, 24 y 48 h, métricas, gráficas, análisis de sobreajuste y respuestas a las preguntas. Todo el contenido se generó a partir del notebook ejecutado.</p>
+      <div class="chips">
+        <a class="chip chip-link" href="#12-preguntas-de-análisis">Ir a las preguntas de análisis →</a>
+        <a class="chip chip-link" href="#7-evaluación-sobre-el-conjunto-de-prueba">Tabla de resultados</a>
+        <a class="chip chip-link" href="#8-gráficas">Gráficas</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor informe-grid">
+    <aside class="toc" aria-label="Contenido">
+      <p class="toc-titulo">Contenido</p>
+      <a href="#1-carga-y-auditoría-de-calidad">Carga y auditoría de calidad</a><a href="#2-reglas-de-limpieza-y-por-qué">Reglas de limpieza (y por qué)</a><a href="#3-análisis-exploratorio">Análisis exploratorio</a><a href="#4-split-cronológico-normalización-y-ventanas">Split cronológico, normalización y ventanas</a><a href="#5-diseño-de-las-arquitecturas">Diseño de las arquitecturas</a><a href="#6-entrenamiento-3-arquitecturas-3-ventanas-9-modelos">Entrenamiento: 3 arquitecturas × 3 ventanas = 9 modelos</a><a href="#7-evaluación-sobre-el-conjunto-de-prueba">Evaluación sobre el conjunto de prueba</a><a href="#8-gráficas">Gráficas</a><a href="#9-sobreajuste-y-generalización">Sobreajuste y generalización</a><a href="#10-experimentos-de-control-dropout-early-stopping-y-número-de-neuronas">Experimentos de control: Dropout, Early Stopping y número de neuronas</a><a href="#11-evidencia-adicional-para-el-análisis">Evidencia adicional para el análisis</a><a href="#12-preguntas-de-análisis">Preguntas de análisis</a><a href="#13-conclusiones">Conclusiones</a><a href="#14-despliegue-en-una-app-web">Despliegue en una app web</a>
+    </aside>
+    <main class="informe">
+      <div class="md"><h2 id="1-carga-y-auditoría-de-calidad">1. Carga y auditoría de calidad</h2>
+</div>
+<pre class="salida">Duplicados exactos: 30
+Timestamps repetidos: 30
+¿Orden cronológico?: False
+Variantes de periodo_dia: [&#x27; noche &#x27;, &#x27;MAÑANA&#x27;, &#x27;Mañana&#x27;, &#x27;TARDE&#x27;, &#x27;madrugada&#x27;, &#x27;mañana&#x27;, &#x27;noche&#x27;, &#x27;tarde&#x27;]</pre>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>nulos</th>
+      <th>% nulos</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>demanda_mw</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>94.58</td>
+      <td>1776.21</td>
+    </tr>
+    <tr>
+      <th>demanda_objetivo</th>
+      <td>1</td>
+      <td>0.01</td>
+      <td>314.12</td>
+      <td>927.31</td>
+    </tr>
+    <tr>
+      <th>dia_semana</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>6.00</td>
+    </tr>
+    <tr>
+      <th>festivo</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>fin_semana</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>hora</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>23.00</td>
+    </tr>
+    <tr>
+      <th>humedad_pct</th>
+      <td>70</td>
+      <td>0.40</td>
+      <td>-2.35</td>
+      <td>129.69</td>
+    </tr>
+    <tr>
+      <th>mes</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>1.00</td>
+      <td>12.00</td>
+    </tr>
+    <tr>
+      <th>periodo_dia</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>precio_kwh</th>
+      <td>70</td>
+      <td>0.40</td>
+      <td>-4.17</td>
+      <td>79.58</td>
+    </tr>
+    <tr>
+      <th>precipitacion_mm</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>21.98</td>
+    </tr>
+    <tr>
+      <th>radiacion_wm2</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1044.72</td>
+    </tr>
+    <tr>
+      <th>temperatura_c</th>
+      <td>70</td>
+      <td>0.40</td>
+      <td>-23.54</td>
+      <td>54.69</td>
+    </tr>
+    <tr>
+      <th>timestamp</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>viento_kmh</th>
+      <td>71</td>
+      <td>0.40</td>
+      <td>-12.20</td>
+      <td>117.05</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="md"><p><strong>Problemas detectados</strong> (coinciden con lo que advierte el enunciado):</p>
+<table>
+<thead>
+<tr>
+  <th>Problema</th>
+  <th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Desorden temporal</td>
+  <td>las filas no están ordenadas por <code>timestamp</code></td>
+</tr>
+<tr>
+  <td>Duplicados</td>
+  <td>30 filas exactamente repetidas</td>
+</tr>
+<tr>
+  <td>Faltantes</td>
+  <td>70 nulos en temperatura, humedad, viento y precio; 1 en el objetivo</td>
+</tr>
+<tr>
+  <td>Inconsistencia de texto</td>
+  <td><code>periodo_dia</code> con mayúsculas y espacios (<code>TARDE</code>, <code>Mañana</code>, <code>noche</code>)</td>
+</tr>
+<tr>
+  <td>Anomalías</td>
+  <td>humedad &gt; 100 %, viento y precio negativos, temperaturas de -23 °C y 54 °C, picos de demanda &gt; 1700 MW</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="md"><h2 id="2-reglas-de-limpieza-y-por-qué">2. Reglas de limpieza (y por qué)</h2>
+<p>Principio rector del taller: <strong>no inventar valores</strong>. Por eso nada se imputa ni se &quot;suaviza&quot;: lo inválido se marca como <code>NaN</code> y las ventanas que lo contengan se excluyen del entrenamiento y la evaluación.</p>
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Regla</th>
+  <th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>R1</td>
+  <td><code>strip</code> + minúsculas en <code>periodo_dia</code></td>
+  <td>son la misma categoría escrita distinto; se pasa de 8 a 4 valores</td>
+</tr>
+<tr>
+  <td>R2</td>
+  <td>Eliminar duplicados exactos</td>
+  <td>repetir una observación la sobre-pondera y puede filtrar filas de entrenamiento a validación</td>
+</tr>
+<tr>
+  <td>R3</td>
+  <td>Ordenar por <code>timestamp</code></td>
+  <td>una secuencia solo tiene sentido en orden temporal; se hace <strong>antes</strong> de crear ventanas</td>
+</tr>
+<tr>
+  <td>R4</td>
+  <td>Verificar una fila por hora</td>
+  <td>tras R2 y R3 la serie queda completa (17 520 h); no hay huecos que rellenar</td>
+</tr>
+<tr>
+  <td>R5</td>
+  <td>Valores fuera de rango físico → <code>NaN</code></td>
+  <td>humedad ∈ [0,100], viento, precipitación, radiación y precio ≥ 0, temperatura ∈ [-10,45] °C; fuera de esos límites son errores de sensor, no clima</td>
+</tr>
+<tr>
+  <td>R6</td>
+  <td><code>demanda_mw</code> fuera de [300, 1000] MW → <code>NaN</code></td>
+  <td>el objetivo (limpio) vive en 314-927 MW; los picos de 1100-1776 MW aparecen en <code>demanda_mw</code> pero <strong>no</strong> en el objetivo, por lo que son errores de medición</td>
+</tr>
+<tr>
+  <td>R7</td>
+  <td>Ventanas con algún <code>NaN</code> se descartan</td>
+  <td>evita imputar; el costo es perder algunas ventanas</td>
+</tr>
+<tr>
+  <td>R8</td>
+  <td>Fila final sin objetivo se descarta</td>
+  <td>2026-12-31 23:00 no tiene &quot;hora siguiente&quot;</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variables usadas como entrada</strong> (15 por hora): las 7 continuas (incluida la demanda pasada), hora/día/mes en codificación <strong>cíclica</strong> seno-coseno (para que 23 h y 0 h queden cerca), <code>fin_semana</code> y <code>festivo</code>.
+<code>periodo_dia</code> se limpia pero se excluye: es una función exacta de <code>hora</code> (información redundante). <code>demanda_objetivo</code> <strong>nunca</strong> es entrada: es la respuesta.</p>
+</div>
+<pre class="salida">Coincidencia demanda(t+1) vs objetivo(t): 99.77%
+Rango del objetivo: 314.12 - 927.31</pre>
+<figure class="lamina"><img src="informe/fig_01.png" loading="lazy" alt="2. Reglas de limpieza (y por qué)"><figcaption>Figura 1. 2. Reglas de limpieza (y por qué)</figcaption></figure>
+<div class="md"><h2 id="3-análisis-exploratorio">3. Análisis exploratorio</h2>
+</div>
+<figure class="lamina"><img src="informe/fig_02.png" loading="lazy" alt="3. Análisis exploratorio"><figcaption>Figura 2. 3. Análisis exploratorio</figcaption></figure>
+<figure class="lamina"><img src="informe/fig_03.png" loading="lazy" alt="3. Análisis exploratorio"><figcaption>Figura 3. 3. Análisis exploratorio</figcaption></figure>
+<figure class="lamina"><img src="informe/fig_04.png" loading="lazy" alt="Autocorrelación de la demanda: justifica el uso de ventanas de 12-48 h"><figcaption>Figura 4. Autocorrelación de la demanda: justifica el uso de ventanas de 12-48 h</figcaption></figure>
+<div class="md"><h2 id="4-split-cronológico-normalización-y-ventanas">4. Split cronológico, normalización y ventanas</h2>
+<ul>
+<li><strong>Split 70 / 15 / 15 por orden temporal</strong> (sin <code>train_test_split</code> aleatorio): entrenamiento primero, luego validación (para Early Stopping y selección) y al final prueba, que nunca se toca hasta evaluar.</li>
+<li><strong>Normalización z-score</strong> con media y desviación calculadas <strong>solo en entrenamiento</strong>, aplicadas luego a validación y prueba.</li>
+<li><strong>Ventanas:</strong> para cada hora <em>t</em>, la entrada son las horas <em>[t-n+1 … t]</em> y el objetivo es la demanda de <em>t+1</em>. Cada ventana se asigna al conjunto según la fecha de <em>t</em>, de modo que el objetivo de validación/prueba nunca se ve en entrenamiento. Las horas anteriores de la entrada son pasado, no hay fuga.</li>
+</ul>
+</div>
+<pre class="salida">entrenamiento  2025-01-01 00:00:00  -&gt;  2026-05-26 23:00:00   (12264 h)
+validación     2026-05-27 00:00:00  -&gt;  2026-09-13 11:00:00   (2628 h)
+prueba         2026-09-13 12:00:00  -&gt;  2026-12-31 23:00:00   (2628 h)
+Media/desv. de entrenamiento:
+                   media     std
+demanda_mw        632.38   97.08
+temperatura_c      18.82    5.59
+humedad_pct        72.21   14.79
+viento_kmh         11.03    4.70
+radiacion_wm2     201.89  257.08
+precipitacion_mm    0.95    2.09
+precio_kwh         24.62    5.41</pre>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>entrenamiento</th>
+      <th>validación</th>
+      <th>prueba</th>
+    </tr>
+    <tr>
+      <th>ventana</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>12</th>
+      <td>9686</td>
+      <td>2051</td>
+      <td>2093</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>7526</td>
+      <td>1605</td>
+      <td>1664</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>4504</td>
+      <td>964</td>
+      <td>1042</td>
+    </tr>
+    <tr>
+      <th>común (n=48)</th>
+      <td>4504</td>
+      <td>964</td>
+      <td>1042</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="md"><p><strong>Nota sobre la pérdida de ventanas.</strong> Cada valor inválido invalida las <em>n</em> ventanas que lo contienen, por eso la ventana de 48 h conserva menos muestras que la de 12 h. Es el precio de no inventar valores. Para que la comparación entre ventanas sea justa, en la Etapa 3 todos los modelos se evaluarán además sobre el <strong>conjunto común</strong> de instantes de prueba.</p>
+</div>
+<pre class="salida">Entradas: [&#x27;demanda_mw&#x27;, &#x27;temperatura_c&#x27;, &#x27;humedad_pct&#x27;, &#x27;viento_kmh&#x27;, &#x27;radiacion_wm2&#x27;, &#x27;precipitacion_mm&#x27;, &#x27;precio_kwh&#x27;, &#x27;hora_sin&#x27;, &#x27;hora_cos&#x27;, &#x27;dia_sin&#x27;, &#x27;dia_cos&#x27;, &#x27;mes_sin&#x27;, &#x27;mes_cos&#x27;, &#x27;fin_semana&#x27;, &#x27;festivo&#x27;]
+Forma (muestras, pasos, variables): (7526, 24, 15)
+Variables continuas en train — media≈0 y std≈1: 0.004 1.001
+OK: sin fuga temporal.</pre>
+<div class="md"><h2 id="5-diseño-de-las-arquitecturas">5. Diseño de las arquitecturas</h2>
+<p>Se comparan tres alternativas. Todas reciben una ventana <code>(n horas × 15 variables)</code> y producen un único valor: la demanda normalizada de la hora siguiente.</p>
+<table>
+<thead>
+<tr>
+  <th></th>
+  <th>Arquitectura</th>
+  <th>Diseño</th>
+  <th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>A</strong></td>
+  <td>LSTM base</td>
+  <td><code>LSTM(32)</code> → <code>Dense(1)</code></td>
+  <td>Línea de referencia: la red recurrente más simple. Si un modelo más complejo no la supera, la complejidad no se justifica.</td>
+</tr>
+<tr>
+  <td><strong>B</strong></td>
+  <td>LSTM profunda</td>
+  <td><code>LSTM(64)</code> → <code>Dropout(0.2)</code> → <code>LSTM(32)</code> → <code>Dropout(0.2)</code> → <code>Dense(16)</code> → <code>Dense(1)</code></td>
+  <td>Dos capas apiladas aprenden representaciones jerárquicas (la primera, patrones horarios; la segunda, tendencias más lentas). El Dropout controla el sobreajuste que trae la mayor capacidad.</td>
+</tr>
+<tr>
+  <td><strong>C</strong></td>
+  <td>CNN-LSTM (propuesta)</td>
+  <td><code>Conv1D(32, k=3, causal)</code> → <code>LSTM(48)</code> → <code>Dropout(0.2)</code> → <code>Dense(16)</code> → <code>Dense(1)</code></td>
+  <td>La convolución detecta cambios locales (rampas de pocas horas, picos de radiación o temperatura) y reduce el ruido antes de la LSTM, que se centra en la dependencia temporal larga. Es causal: cada paso solo ve horas anteriores, sin información futura. Menos parámetros que B.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Configuración común de entrenamiento</strong> (para que la comparación sea justa):</p>
+<ul>
+<li>Pérdida <strong>MSE</strong>, optimizador <strong>Adam</strong> (lr = 1e-3), lotes de 64, hasta 80 épocas.</li>
+<li><strong>Early Stopping</strong> sobre la pérdida de validación (paciencia 10, restaura los mejores pesos).</li>
+<li><strong>ReduceLROnPlateau</strong>: reduce el learning rate a la mitad si la validación se estanca 4 épocas.</li>
+<li>Semilla fija. Los lotes se mezclan <em>dentro</em> de entrenamiento (cada muestra ya es una ventana completa, así que barajar no rompe el orden temporal ni mezcla conjuntos).</li>
+</ul>
+</div>
+<div class="md"><h2 id="6-entrenamiento-3-arquitecturas-3-ventanas-9-modelos">6. Entrenamiento: 3 arquitecturas × 3 ventanas = 9 modelos</h2>
+<p>Cada modelo se entrena con las ventanas de su propio tamaño (<code>datos[n]</code>), usando validación únicamente para Early Stopping. <strong>El conjunto de prueba no se usa en ningún momento del entrenamiento.</strong></p>
+</div>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>arq</th>
+      <th>ventana</th>
+      <th>epocas_ejecutadas</th>
+      <th>mejor_epoca</th>
+      <th>loss_train_mejor</th>
+      <th>loss_val_mejor</th>
+      <th>parametros</th>
+      <th>segundos</th>
+      <th>gap (val-train)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A</td>
+      <td>12</td>
+      <td>60</td>
+      <td>50</td>
+      <td>0.0583</td>
+      <td>0.0689</td>
+      <td>6177</td>
+      <td>49.7946</td>
+      <td>0.0106</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A</td>
+      <td>24</td>
+      <td>45</td>
+      <td>35</td>
+      <td>0.0628</td>
+      <td>0.0725</td>
+      <td>6177</td>
+      <td>45.1892</td>
+      <td>0.0096</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A</td>
+      <td>48</td>
+      <td>55</td>
+      <td>45</td>
+      <td>0.0613</td>
+      <td>0.0737</td>
+      <td>6177</td>
+      <td>58.5274</td>
+      <td>0.0124</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>B</td>
+      <td>12</td>
+      <td>54</td>
+      <td>44</td>
+      <td>0.0708</td>
+      <td>0.0695</td>
+      <td>33441</td>
+      <td>106.4525</td>
+      <td>-0.0014</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>B</td>
+      <td>24</td>
+      <td>42</td>
+      <td>32</td>
+      <td>0.0810</td>
+      <td>0.0740</td>
+      <td>33441</td>
+      <td>98.9429</td>
+      <td>-0.0070</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>B</td>
+      <td>48</td>
+      <td>55</td>
+      <td>45</td>
+      <td>0.0801</td>
+      <td>0.0765</td>
+      <td>33441</td>
+      <td>136.9567</td>
+      <td>-0.0036</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>C</td>
+      <td>12</td>
+      <td>56</td>
+      <td>46</td>
+      <td>0.0672</td>
+      <td>0.0710</td>
+      <td>17825</td>
+      <td>64.7128</td>
+      <td>0.0038</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>C</td>
+      <td>24</td>
+      <td>66</td>
+      <td>56</td>
+      <td>0.0711</td>
+      <td>0.0743</td>
+      <td>17825</td>
+      <td>90.0674</td>
+      <td>0.0031</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>C</td>
+      <td>48</td>
+      <td>51</td>
+      <td>41</td>
+      <td>0.0730</td>
+      <td>0.0759</td>
+      <td>17825</td>
+      <td>71.7139</td>
+      <td>0.0029</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<figure class="lamina"><img src="informe/fig_05.png" loading="lazy" alt="Curvas de pérdida (MSE sobre datos normalizados) de los 9 modelos"><figcaption>Figura 5. Curvas de pérdida (MSE sobre datos normalizados) de los 9 modelos</figcaption></figure>
+<div class="md"><p><strong>Lectura preliminar de las curvas</strong> (las métricas finales sobre prueba —MAE, MSE, RMSE, MAPE y R²— llegan en la Etapa 3):</p>
+<ul>
+<li><strong>Todas convergen</strong> en 40-66 épocas y Early Stopping detiene el entrenamiento 10 épocas después del mejor punto de validación (línea punteada), restaurando esos pesos.</li>
+<li><strong>A (sin Dropout)</strong> es la única donde la pérdida de entrenamiento sigue bajando mientras la de validación se aplana: aparece una brecha pequeña pero sistemática (≈0.010-0.012), un <strong>sobreajuste leve</strong>.</li>
+<li><strong>B y C (con Dropout)</strong> muestran brecha casi nula o incluso negativa (validación ≤ entrenamiento). Esto no es un error: el Dropout está activo solo al calcular la pérdida de entrenamiento y se apaga al validar, así que la red &quot;completa&quot; rinde mejor que la red con neuronas apagadas.</li>
+<li><strong>Ventana:</strong> en validación, 12 h obtiene la menor pérdida en las tres arquitecturas. Ojo: con 48 h hay menos muestras de entrenamiento (4 504 vs 9 686) por las ventanas descartadas, así que la comparación definitiva se hará sobre el conjunto de prueba común.</li>
+<li><strong>Más parámetros no implicó mejor resultado:</strong> B (33 441 parámetros) no supera a A (6 177) en validación.</li>
+</ul>
+</div>
+<div class="md"><h2 id="7-evaluación-sobre-el-conjunto-de-prueba">7. Evaluación sobre el conjunto de prueba</h2>
+<p>Todas las métricas están en <strong>MW</strong> (se des-normaliza con los parámetros de entrenamiento):</p>
+<ul>
+<li><strong>MAE</strong> = media del valor absoluto de (real − predicho): error típico en MW, fácil de interpretar.</li>
+<li><strong>MSE</strong> = media de (real − predicho)²: castiga más los errores grandes.</li>
+<li><strong>RMSE</strong> = √MSE: mismo castigo que MSE pero en MW.</li>
+<li><strong>MAPE</strong> = media del valor absoluto de (real − predicho) / real × 100: error relativo en %.</li>
+<li><strong>R²</strong> = 1 − SSE/SST: fracción de la variabilidad de la demanda que explica el modelo (1 = perfecto).</li>
+</ul>
+<p><strong>Conjunto común de prueba.</strong> Para comparar ventanas de forma justa, la tabla principal evalúa los 9 modelos sobre los <strong>mismos instantes</strong> de prueba (los válidos para la ventana de 48 h). Se incluye como referencia un modelo ingenuo de <strong>persistencia</strong> (<em>la demanda de la próxima hora será igual a la actual</em>): un modelo útil debe superarlo con claridad.</p>
+</div>
+<pre class="salida">Instantes de prueba comunes: 1042  (2026-09-26 a 2026-12-31)</pre>
+<div class="lamina tabla-informe"><style type="text/css">
+#T_fe931_row3_col2, #T_fe931_row3_col3, #T_fe931_row3_col4, #T_fe931_row3_col5, #T_fe931_row3_col6 {
+  background-color: #cde2fb;
+}
+</style>
+<table id="T_fe931">
+  <thead>
+    <tr>
+      <th id="T_fe931_level0_col0" class="col_heading level0 col0" >Modelo</th>
+      <th id="T_fe931_level0_col1" class="col_heading level0 col1" >Ventana</th>
+      <th id="T_fe931_level0_col2" class="col_heading level0 col2" >MAE</th>
+      <th id="T_fe931_level0_col3" class="col_heading level0 col3" >MSE</th>
+      <th id="T_fe931_level0_col4" class="col_heading level0 col4" >RMSE</th>
+      <th id="T_fe931_level0_col5" class="col_heading level0 col5" >MAPE</th>
+      <th id="T_fe931_level0_col6" class="col_heading level0 col6" >R²</th>
+      <th id="T_fe931_level0_col7" class="col_heading level0 col7" >Épocas</th>
+      <th id="T_fe931_level0_col8" class="col_heading level0 col8" >Mejor época</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_fe931_row0_col0" class="data row0 col0" >A · LSTM base</td>
+      <td id="T_fe931_row0_col1" class="data row0 col1" >12</td>
+      <td id="T_fe931_row0_col2" class="data row0 col2" >19.86</td>
+      <td id="T_fe931_row0_col3" class="data row0 col3" >624.6</td>
+      <td id="T_fe931_row0_col4" class="data row0 col4" >24.99</td>
+      <td id="T_fe931_row0_col5" class="data row0 col5" >3.43%</td>
+      <td id="T_fe931_row0_col6" class="data row0 col6" >0.9037</td>
+      <td id="T_fe931_row0_col7" class="data row0 col7" >60</td>
+      <td id="T_fe931_row0_col8" class="data row0 col8" >50</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row1_col0" class="data row1 col0" >A · LSTM base</td>
+      <td id="T_fe931_row1_col1" class="data row1 col1" >24</td>
+      <td id="T_fe931_row1_col2" class="data row1 col2" >20.12</td>
+      <td id="T_fe931_row1_col3" class="data row1 col3" >652.6</td>
+      <td id="T_fe931_row1_col4" class="data row1 col4" >25.55</td>
+      <td id="T_fe931_row1_col5" class="data row1 col5" >3.47%</td>
+      <td id="T_fe931_row1_col6" class="data row1 col6" >0.8994</td>
+      <td id="T_fe931_row1_col7" class="data row1 col7" >45</td>
+      <td id="T_fe931_row1_col8" class="data row1 col8" >35</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row2_col0" class="data row2 col0" >A · LSTM base</td>
+      <td id="T_fe931_row2_col1" class="data row2 col1" >48</td>
+      <td id="T_fe931_row2_col2" class="data row2 col2" >21.06</td>
+      <td id="T_fe931_row2_col3" class="data row2 col3" >718.4</td>
+      <td id="T_fe931_row2_col4" class="data row2 col4" >26.80</td>
+      <td id="T_fe931_row2_col5" class="data row2 col5" >3.63%</td>
+      <td id="T_fe931_row2_col6" class="data row2 col6" >0.8893</td>
+      <td id="T_fe931_row2_col7" class="data row2 col7" >55</td>
+      <td id="T_fe931_row2_col8" class="data row2 col8" >45</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row3_col0" class="data row3 col0" >B · LSTM profunda</td>
+      <td id="T_fe931_row3_col1" class="data row3 col1" >12</td>
+      <td id="T_fe931_row3_col2" class="data row3 col2" >19.43</td>
+      <td id="T_fe931_row3_col3" class="data row3 col3" >613.5</td>
+      <td id="T_fe931_row3_col4" class="data row3 col4" >24.77</td>
+      <td id="T_fe931_row3_col5" class="data row3 col5" >3.37%</td>
+      <td id="T_fe931_row3_col6" class="data row3 col6" >0.9054</td>
+      <td id="T_fe931_row3_col7" class="data row3 col7" >54</td>
+      <td id="T_fe931_row3_col8" class="data row3 col8" >44</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row4_col0" class="data row4 col0" >B · LSTM profunda</td>
+      <td id="T_fe931_row4_col1" class="data row4 col1" >24</td>
+      <td id="T_fe931_row4_col2" class="data row4 col2" >20.05</td>
+      <td id="T_fe931_row4_col3" class="data row4 col3" >659.7</td>
+      <td id="T_fe931_row4_col4" class="data row4 col4" >25.69</td>
+      <td id="T_fe931_row4_col5" class="data row4 col5" >3.47%</td>
+      <td id="T_fe931_row4_col6" class="data row4 col6" >0.8983</td>
+      <td id="T_fe931_row4_col7" class="data row4 col7" >42</td>
+      <td id="T_fe931_row4_col8" class="data row4 col8" >32</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row5_col0" class="data row5 col0" >B · LSTM profunda</td>
+      <td id="T_fe931_row5_col1" class="data row5 col1" >48</td>
+      <td id="T_fe931_row5_col2" class="data row5 col2" >20.68</td>
+      <td id="T_fe931_row5_col3" class="data row5 col3" >681.4</td>
+      <td id="T_fe931_row5_col4" class="data row5 col4" >26.10</td>
+      <td id="T_fe931_row5_col5" class="data row5 col5" >3.58%</td>
+      <td id="T_fe931_row5_col6" class="data row5 col6" >0.8950</td>
+      <td id="T_fe931_row5_col7" class="data row5 col7" >55</td>
+      <td id="T_fe931_row5_col8" class="data row5 col8" >45</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row6_col0" class="data row6 col0" >C · CNN-LSTM</td>
+      <td id="T_fe931_row6_col1" class="data row6 col1" >12</td>
+      <td id="T_fe931_row6_col2" class="data row6 col2" >19.75</td>
+      <td id="T_fe931_row6_col3" class="data row6 col3" >641.8</td>
+      <td id="T_fe931_row6_col4" class="data row6 col4" >25.33</td>
+      <td id="T_fe931_row6_col5" class="data row6 col5" >3.42%</td>
+      <td id="T_fe931_row6_col6" class="data row6 col6" >0.9011</td>
+      <td id="T_fe931_row6_col7" class="data row6 col7" >56</td>
+      <td id="T_fe931_row6_col8" class="data row6 col8" >46</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row7_col0" class="data row7 col0" >C · CNN-LSTM</td>
+      <td id="T_fe931_row7_col1" class="data row7 col1" >24</td>
+      <td id="T_fe931_row7_col2" class="data row7 col2" >19.86</td>
+      <td id="T_fe931_row7_col3" class="data row7 col3" >650.8</td>
+      <td id="T_fe931_row7_col4" class="data row7 col4" >25.51</td>
+      <td id="T_fe931_row7_col5" class="data row7 col5" >3.43%</td>
+      <td id="T_fe931_row7_col6" class="data row7 col6" >0.8997</td>
+      <td id="T_fe931_row7_col7" class="data row7 col7" >66</td>
+      <td id="T_fe931_row7_col8" class="data row7 col8" >56</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row8_col0" class="data row8 col0" >C · CNN-LSTM</td>
+      <td id="T_fe931_row8_col1" class="data row8 col1" >48</td>
+      <td id="T_fe931_row8_col2" class="data row8 col2" >21.28</td>
+      <td id="T_fe931_row8_col3" class="data row8 col3" >744.6</td>
+      <td id="T_fe931_row8_col4" class="data row8 col4" >27.29</td>
+      <td id="T_fe931_row8_col5" class="data row8 col5" >3.68%</td>
+      <td id="T_fe931_row8_col6" class="data row8 col6" >0.8852</td>
+      <td id="T_fe931_row8_col7" class="data row8 col7" >51</td>
+      <td id="T_fe931_row8_col8" class="data row8 col8" >41</td>
+    </tr>
+    <tr>
+      <td id="T_fe931_row9_col0" class="data row9 col0" >Persistencia (referencia)</td>
+      <td id="T_fe931_row9_col1" class="data row9 col1" >1</td>
+      <td id="T_fe931_row9_col2" class="data row9 col2" >35.50</td>
+      <td id="T_fe931_row9_col3" class="data row9 col3" >1963.3</td>
+      <td id="T_fe931_row9_col4" class="data row9 col4" >44.31</td>
+      <td id="T_fe931_row9_col5" class="data row9 col5" >6.07%</td>
+      <td id="T_fe931_row9_col6" class="data row9 col6" >0.6974</td>
+      <td id="T_fe931_row9_col7" class="data row9 col7" >0</td>
+      <td id="T_fe931_row9_col8" class="data row9 col8" >0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Modelo</th>
+      <th>Ventana</th>
+      <th>n prueba</th>
+      <th>MAE</th>
+      <th>MSE</th>
+      <th>RMSE</th>
+      <th>MAPE</th>
+      <th>R²</th>
+      <th>Épocas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A · LSTM base</td>
+      <td>12</td>
+      <td>2093</td>
+      <td>19.91</td>
+      <td>625.4</td>
+      <td>25.01</td>
+      <td>3.40</td>
+      <td>0.9076</td>
+      <td>60</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A · LSTM base</td>
+      <td>24</td>
+      <td>1664</td>
+      <td>20.30</td>
+      <td>661.1</td>
+      <td>25.71</td>
+      <td>3.47</td>
+      <td>0.9023</td>
+      <td>45</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A · LSTM base</td>
+      <td>48</td>
+      <td>1042</td>
+      <td>21.06</td>
+      <td>718.4</td>
+      <td>26.80</td>
+      <td>3.63</td>
+      <td>0.8893</td>
+      <td>55</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>B · LSTM profunda</td>
+      <td>12</td>
+      <td>2093</td>
+      <td>19.47</td>
+      <td>612.1</td>
+      <td>24.74</td>
+      <td>3.34</td>
+      <td>0.9096</td>
+      <td>54</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>B · LSTM profunda</td>
+      <td>24</td>
+      <td>1664</td>
+      <td>20.25</td>
+      <td>664.7</td>
+      <td>25.78</td>
+      <td>3.47</td>
+      <td>0.9017</td>
+      <td>42</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>B · LSTM profunda</td>
+      <td>48</td>
+      <td>1042</td>
+      <td>20.68</td>
+      <td>681.4</td>
+      <td>26.10</td>
+      <td>3.58</td>
+      <td>0.8950</td>
+      <td>55</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>C · CNN-LSTM</td>
+      <td>12</td>
+      <td>2093</td>
+      <td>19.68</td>
+      <td>626.3</td>
+      <td>25.03</td>
+      <td>3.37</td>
+      <td>0.9075</td>
+      <td>56</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>C · CNN-LSTM</td>
+      <td>24</td>
+      <td>1664</td>
+      <td>20.23</td>
+      <td>667.3</td>
+      <td>25.83</td>
+      <td>3.47</td>
+      <td>0.9014</td>
+      <td>66</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>C · CNN-LSTM</td>
+      <td>48</td>
+      <td>1042</td>
+      <td>21.28</td>
+      <td>744.6</td>
+      <td>27.29</td>
+      <td>3.68</td>
+      <td>0.8852</td>
+      <td>51</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="md"><p><strong>Lectura de la tabla</strong></p>
+<ul>
+<li><strong>Las 9 LSTM superan ampliamente a la persistencia:</strong> RMSE de ~25-27 MW frente a 44 MW (≈ −43 %) y R² de 0.89-0.91 frente a 0.70. El modelo aprende algo más que &quot;repetir la última hora&quot;: usa el perfil diario, el calendario y el clima.</li>
+<li><strong>Error típico ≈ 20 MW (MAPE ≈ 3.4 %)</strong> sobre una demanda media de ~600 MW.</li>
+<li><strong>Ventana:</strong> 12 h es la mejor en las tres arquitecturas y 48 h la peor. El patrón diario ya se ve en las codificaciones cíclicas de hora/día, y las últimas horas contienen casi toda la información útil; alargar la ventana añade entradas poco informativas y, por las ventanas descartadas, reduce las muestras de entrenamiento (9 686 → 4 504).</li>
+<li><strong>Arquitecturas:</strong> las diferencias entre A, B y C son pequeñas (≤ 0.6 MW de RMSE en la misma ventana), menores que la variación que produce cambiar la ventana. La complejidad extra de B y C apenas se traduce en mejora.</li>
+</ul>
+</div>
+<div class="md"><h3 id="selección-del-modelo">Selección del modelo</h3>
+<p>El modelo final se elige con <strong>validación</strong>, no con prueba: elegir mirando prueba convertiría a la prueba en otro conjunto de ajuste y la estimación del error dejaría de ser honesta.</p>
+</div>
+<pre class="salida">RMSE de validación (MW, instantes comunes):
+A_w12    25.26
+A_w24    25.33
+B_w12    25.50
+C_w12    25.71
+C_w24    25.91
+B_w24    26.24
+A_w48    26.31
+C_w48    26.70
+B_w48    26.81
+Modelo seleccionado por validación: A · LSTM base con ventana de 12 h</pre>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Modelo</th>
+      <th>Ventana</th>
+      <th>MAE</th>
+      <th>MSE</th>
+      <th>RMSE</th>
+      <th>MAPE</th>
+      <th>R²</th>
+      <th>Épocas</th>
+      <th>Mejor época</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A · LSTM base</td>
+      <td>12</td>
+      <td>19.8565</td>
+      <td>624.5809</td>
+      <td>24.9916</td>
+      <td>3.4289</td>
+      <td>0.9037</td>
+      <td>60</td>
+      <td>50</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="md"><h2 id="8-gráficas">8. Gráficas</h2>
+</div>
+<div class="md"><h3 id="81-comparación-de-modelos">8.1 Comparación de modelos</h3>
+</div>
+<figure class="lamina"><img src="informe/fig_06.png" loading="lazy" alt="8.1 Comparación de modelos"><figcaption>Figura 6. 8.1 Comparación de modelos</figcaption></figure>
+<div class="md"><h3 id="82-demanda-real-vs-predicha">8.2 Demanda real vs. predicha</h3>
+</div>
+<figure class="lamina"><img src="informe/fig_07.png" loading="lazy" alt="8.2 Demanda real vs. predicha"><figcaption>Figura 7. 8.2 Demanda real vs. predicha</figcaption></figure>
+<figure class="lamina"><img src="informe/fig_08.png" loading="lazy" alt="Las tres arquitecturas sobre la misma semana (ventana del modelo seleccionado)"><figcaption>Figura 8. Las tres arquitecturas sobre la misma semana (ventana del modelo seleccionado)</figcaption></figure>
+<div class="md"><h3 id="83-error-de-predicción">8.3 Error de predicción</h3>
+</div>
+<figure class="lamina"><img src="informe/fig_09.png" loading="lazy" alt="8.3 Error de predicción"><figcaption>Figura 9. 8.3 Error de predicción</figcaption></figure>
+<pre class="salida">Sesgo medio: -0.70 MW | |error| &lt; 25 MW en el 68.9% de las horas | percentil 95 de |error|: 49.0 MW</pre>
+<div class="md"><h2 id="9-sobreajuste-y-generalización">9. Sobreajuste y generalización</h2>
+<p>Se compara el error de cada modelo en entrenamiento, validación y prueba (cada uno sobre sus propias ventanas válidas). Si el error de entrenamiento es mucho menor que el de validación/prueba, el modelo memorizó en lugar de generalizar.</p>
+</div>
+<div class="lamina tabla-informe"><style type="text/css">
+#T_a1995_row0_col5 {
+  background-color: #cee0f2;
+  color: #000000;
+}
+#T_a1995_row1_col5, #T_a1995_row5_col5 {
+  background-color: #d1e2f3;
+  color: #000000;
+}
+#T_a1995_row2_col5 {
+  background-color: #aacfe5;
+  color: #000000;
+}
+#T_a1995_row3_col5 {
+  background-color: #e4eff9;
+  color: #000000;
+}
+#T_a1995_row4_col5 {
+  background-color: #e3eef9;
+  color: #000000;
+}
+#T_a1995_row6_col5 {
+  background-color: #deebf7;
+  color: #000000;
+}
+#T_a1995_row7_col5 {
+  background-color: #d0e1f2;
+  color: #000000;
+}
+#T_a1995_row8_col5 {
+  background-color: #add0e6;
+  color: #000000;
+}
+</style>
+<table id="T_a1995">
+  <thead>
+    <tr>
+      <th id="T_a1995_level0_col0" class="col_heading level0 col0" >Modelo</th>
+      <th id="T_a1995_level0_col1" class="col_heading level0 col1" >Ventana</th>
+      <th id="T_a1995_level0_col2" class="col_heading level0 col2" >RMSE train</th>
+      <th id="T_a1995_level0_col3" class="col_heading level0 col3" >RMSE val</th>
+      <th id="T_a1995_level0_col4" class="col_heading level0 col4" >RMSE test</th>
+      <th id="T_a1995_level0_col5" class="col_heading level0 col5" >test/train</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_a1995_row0_col0" class="data row0 col0" >A · LSTM base</td>
+      <td id="T_a1995_row0_col1" class="data row0 col1" >12</td>
+      <td id="T_a1995_row0_col2" class="data row0 col2" >23.32</td>
+      <td id="T_a1995_row0_col3" class="data row0 col3" >25.43</td>
+      <td id="T_a1995_row0_col4" class="data row0 col4" >25.01</td>
+      <td id="T_a1995_row0_col5" class="data row0 col5" >1.07</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row1_col0" class="data row1 col0" >A · LSTM base</td>
+      <td id="T_a1995_row1_col1" class="data row1 col1" >24</td>
+      <td id="T_a1995_row1_col2" class="data row1 col2" >24.08</td>
+      <td id="T_a1995_row1_col3" class="data row1 col3" >26.08</td>
+      <td id="T_a1995_row1_col4" class="data row1 col4" >25.71</td>
+      <td id="T_a1995_row1_col5" class="data row1 col5" >1.07</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row2_col0" class="data row2 col0" >A · LSTM base</td>
+      <td id="T_a1995_row2_col1" class="data row2 col1" >48</td>
+      <td id="T_a1995_row2_col2" class="data row2 col2" >23.96</td>
+      <td id="T_a1995_row2_col3" class="data row2 col3" >26.31</td>
+      <td id="T_a1995_row2_col4" class="data row2 col4" >26.80</td>
+      <td id="T_a1995_row2_col5" class="data row2 col5" >1.12</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row3_col0" class="data row3 col0" >B · LSTM profunda</td>
+      <td id="T_a1995_row3_col1" class="data row3 col1" >12</td>
+      <td id="T_a1995_row3_col2" class="data row3 col2" >23.95</td>
+      <td id="T_a1995_row3_col3" class="data row3 col3" >25.53</td>
+      <td id="T_a1995_row3_col4" class="data row3 col4" >24.74</td>
+      <td id="T_a1995_row3_col5" class="data row3 col5" >1.03</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row4_col0" class="data row4 col0" >B · LSTM profunda</td>
+      <td id="T_a1995_row4_col1" class="data row4 col1" >24</td>
+      <td id="T_a1995_row4_col2" class="data row4 col2" >24.92</td>
+      <td id="T_a1995_row4_col3" class="data row4 col3" >26.36</td>
+      <td id="T_a1995_row4_col4" class="data row4 col4" >25.78</td>
+      <td id="T_a1995_row4_col5" class="data row4 col5" >1.03</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row5_col0" class="data row5 col0" >B · LSTM profunda</td>
+      <td id="T_a1995_row5_col1" class="data row5 col1" >48</td>
+      <td id="T_a1995_row5_col2" class="data row5 col2" >24.46</td>
+      <td id="T_a1995_row5_col3" class="data row5 col3" >26.81</td>
+      <td id="T_a1995_row5_col4" class="data row5 col4" >26.10</td>
+      <td id="T_a1995_row5_col5" class="data row5 col5" >1.07</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row6_col0" class="data row6 col0" >C · CNN-LSTM</td>
+      <td id="T_a1995_row6_col1" class="data row6 col1" >12</td>
+      <td id="T_a1995_row6_col2" class="data row6 col2" >23.95</td>
+      <td id="T_a1995_row6_col3" class="data row6 col3" >25.81</td>
+      <td id="T_a1995_row6_col4" class="data row6 col4" >25.03</td>
+      <td id="T_a1995_row6_col5" class="data row6 col5" >1.04</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row7_col0" class="data row7 col0" >C · CNN-LSTM</td>
+      <td id="T_a1995_row7_col1" class="data row7 col1" >24</td>
+      <td id="T_a1995_row7_col2" class="data row7 col2" >24.12</td>
+      <td id="T_a1995_row7_col3" class="data row7 col3" >26.41</td>
+      <td id="T_a1995_row7_col4" class="data row7 col4" >25.83</td>
+      <td id="T_a1995_row7_col5" class="data row7 col5" >1.07</td>
+    </tr>
+    <tr>
+      <td id="T_a1995_row8_col0" class="data row8 col0" >C · CNN-LSTM</td>
+      <td id="T_a1995_row8_col1" class="data row8 col1" >48</td>
+      <td id="T_a1995_row8_col2" class="data row8 col2" >24.45</td>
+      <td id="T_a1995_row8_col3" class="data row8 col3" >26.70</td>
+      <td id="T_a1995_row8_col4" class="data row8 col4" >27.29</td>
+      <td id="T_a1995_row8_col5" class="data row8 col5" >1.12</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="md"><p><strong>Lectura.</strong> El cociente RMSE prueba / entrenamiento está entre <strong>1.03 y 1.12</strong>: el error fuera de la muestra es apenas 3-12 % mayor que dentro, así que <strong>no hay sobreajuste relevante</strong> y los modelos generalizan a un periodo (sept-dic 2026) que nunca vieron. Los modelos <strong>con Dropout (B, C) tienen las brechas más bajas</strong> (1.03-1.07 en 12-24 h), y las ventanas de 48 h las más altas (1.07-1.12), coherente con que tienen menos muestras para la misma cantidad de parámetros. Validación y prueba quedan muy cerca, señal de que la validación fue un buen estimador para elegir el modelo.</p>
+</div>
+<figure class="lamina"><img src="informe/fig_10.png" loading="lazy" alt="9. Sobreajuste y generalización"><figcaption>Figura 10. 9. Sobreajuste y generalización</figcaption></figure>
+<div class="md"><h2 id="10-experimentos-de-control-dropout-early-stopping-y-número-de-neuronas">10. Experimentos de control: Dropout, Early Stopping y número de neuronas</h2>
+<p>Para responder con evidencia (y no solo con teoría) las preguntas 4, 5 y 6, se entrenan variantes controladas con la ventana de 12 h, cambiando <strong>un solo factor</strong> a la vez:</p>
+<table>
+<thead>
+<tr>
+  <th>Experimento</th>
+  <th>Variante</th>
+  <th>Se compara con</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Dropout</td>
+  <td>B sin Dropout (<code>dropout=0</code>)</td>
+  <td>B con Dropout 0.2</td>
+</tr>
+<tr>
+  <td>Early Stopping</td>
+  <td>A entrenada 150 épocas fijas, sin Early Stopping</td>
+  <td>A con Early Stopping</td>
+</tr>
+<tr>
+  <td>Neuronas</td>
+  <td>A con 8 y con 128 unidades</td>
+  <td>A con 32 unidades</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>parametros</th>
+      <th>epocas</th>
+      <th>RMSE train</th>
+      <th>RMSE test</th>
+      <th>R² test</th>
+      <th>brecha test−train</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>A con 32 neuronas + Early Stopping (referencia)</th>
+      <td>6177.0</td>
+      <td>60.0</td>
+      <td>23.32</td>
+      <td>25.01</td>
+      <td>0.9076</td>
+      <td>1.69</td>
+    </tr>
+    <tr>
+      <th>B con Dropout 0.2 (referencia)</th>
+      <td>33441.0</td>
+      <td>54.0</td>
+      <td>23.95</td>
+      <td>24.74</td>
+      <td>0.9096</td>
+      <td>0.79</td>
+    </tr>
+    <tr>
+      <th>B sin Dropout</th>
+      <td>33441.0</td>
+      <td>41.0</td>
+      <td>23.23</td>
+      <td>25.26</td>
+      <td>0.9058</td>
+      <td>2.03</td>
+    </tr>
+    <tr>
+      <th>A sin Early Stopping</th>
+      <td>6177.0</td>
+      <td>150.0</td>
+      <td>21.08</td>
+      <td>28.87</td>
+      <td>0.8769</td>
+      <td>7.79</td>
+    </tr>
+    <tr>
+      <th>A con 8 neuronas</th>
+      <td>777.0</td>
+      <td>80.0</td>
+      <td>24.80</td>
+      <td>25.22</td>
+      <td>0.9061</td>
+      <td>0.42</td>
+    </tr>
+    <tr>
+      <th>A con 128 neuronas</th>
+      <td>73857.0</td>
+      <td>41.0</td>
+      <td>22.88</td>
+      <td>24.92</td>
+      <td>0.9083</td>
+      <td>2.04</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<figure class="lamina"><img src="informe/fig_11.png" loading="lazy" alt="10. Experimentos de control: Dropout, Early Stopping y número de neuronas"><figcaption>Figura 11. 10. Experimentos de control: Dropout, Early Stopping y número de neuronas</figcaption></figure>
+<div class="md"><p><strong>Lectura de los experimentos de control</strong></p>
+<ul>
+<li><strong>Sin Early Stopping</strong> (150 épocas): el error de entrenamiento sigue bajando (23.3 → 21.1 MW) pero la validación <strong>sube</strong> desde la época ~35 y el RMSE de prueba empeora de 25.0 a <strong>28.9 MW</strong> (+15 %). Es sobreajuste de libro: la red empieza a memorizar ruido. Early Stopping lo evita deteniéndose en el mínimo de validación.</li>
+<li><strong>Sin Dropout</strong> (B): entrena más rápido y baja más el error de entrenamiento, pero la brecha prueba-entrenamiento pasa de 0.8 a 2.0 MW y el RMSE de prueba empeora (24.7 → 25.3 MW). El Dropout actúa como regularizador.</li>
+<li><strong>Neuronas:</strong> con <strong>8 neuronas (777 parámetros)</strong> el RMSE de prueba es 25.2 MW; con 32, 25.0; con <strong>128 (73 857 parámetros, 95× más)</strong>, 24.9. Multiplicar los parámetros casi no mejora y aumenta la brecha de generalización (0.4 → 2.0 MW). <strong>Más neuronas no implica mejores resultados</strong>: el límite lo pone la información disponible en los datos, no la capacidad del modelo.</li>
+</ul>
+</div>
+<div class="md"><h2 id="11-evidencia-adicional-para-el-análisis">11. Evidencia adicional para el análisis</h2>
+<h3 id="111-aporta-algo-la-lstm-frente-a-un-modelo-lineal">11.1 ¿Aporta algo la LSTM frente a un modelo lineal?</h3>
+<p>Se entrena una regresión lineal (Ridge) sobre exactamente las mismas ventanas de 12 h, aplanadas (12 × 15 = 180 entradas). Si la LSTM no la superara, su complejidad no estaría justificada.</p>
+</div>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>MAE</th>
+      <th>MSE</th>
+      <th>RMSE</th>
+      <th>MAPE</th>
+      <th>R²</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Persistencia</th>
+      <td>35.50</td>
+      <td>1963.3</td>
+      <td>44.31</td>
+      <td>6.07</td>
+      <td>0.6974</td>
+    </tr>
+    <tr>
+      <th>Regresión lineal (Ridge, 12 h)</th>
+      <td>22.53</td>
+      <td>874.2</td>
+      <td>29.57</td>
+      <td>3.90</td>
+      <td>0.8652</td>
+    </tr>
+    <tr>
+      <th>LSTM A (12 h)</th>
+      <td>19.86</td>
+      <td>624.6</td>
+      <td>24.99</td>
+      <td>3.43</td>
+      <td>0.9037</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="md"><h3 id="112-importancia-de-las-variables-permutación">11.2 Importancia de las variables (permutación)</h3>
+<p>Para cada variable se <strong>desordenan sus valores entre las muestras de prueba</strong> (en todos los pasos de la ventana) y se mide cuánto empeora el RMSE del modelo seleccionado. Si el modelo depende de esa variable, el error sube mucho; si no la usa, casi no cambia. Las codificaciones seno/coseno de una misma variable se permutan juntas. Se promedian 3 repeticiones.</p>
+</div>
+<figure class="lamina"><img src="informe/fig_12.png" loading="lazy" alt="11.2 Importancia de las variables (permutación)"><figcaption>Figura 12. 11.2 Importancia de las variables (permutación)</figcaption></figure>
+<div class="md"><h3 id="113-dónde-se-equivoca-más-el-modelo">11.3 ¿Dónde se equivoca más el modelo?</h3>
+</div>
+<pre class="salida">Horas con |error| &gt; 50 MW: 4.9%
+Festivos en entrenamiento: 192 horas (8 días)</pre>
+<div class="lamina tabla-informe"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>MAE (MW)</th>
+      <th>horas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>festivo</th>
+      <td>34.84</td>
+      <td>38</td>
+    </tr>
+    <tr>
+      <th>no festivo</th>
+      <td>19.64</td>
+      <td>2055</td>
+    </tr>
+    <tr>
+      <th>fin de semana</th>
+      <td>20.01</td>
+      <td>621</td>
+    </tr>
+    <tr>
+      <th>día laboral</th>
+      <td>19.87</td>
+      <td>1472</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="md"><h2 id="12-preguntas-de-análisis">12. Preguntas de análisis</h2>
+<h3 id="1-por-qué-lstm-es-apropiada-para-este-problema">1. ¿Por qué LSTM es apropiada para este problema?</h3>
+<p>La demanda eléctrica es una <strong>serie temporal</strong>: el valor de la próxima hora depende de lo que pasó en las horas anteriores (inercia del consumo, rampas de la mañana y la tarde, el ciclo diario). Una red densa trata cada entrada como independiente y no tiene noción de orden; una RNN simple sí la tiene, pero sufre de <strong>desvanecimiento del gradiente</strong> y &quot;olvida&quot; lo ocurrido hace muchas horas.</p>
+<p>La LSTM resuelve esto con una <strong>celda de memoria</strong> y tres <strong>compuertas</strong> (olvido, entrada y salida) que aprenden qué información conservar, qué añadir y qué exponer en cada paso. Además:</p>
+<ul>
+<li>acepta entradas <strong>multivariadas</strong> (demanda, clima, precio y calendario a la vez) y aprende relaciones <strong>no lineales</strong> entre ellas (p. ej. la temperatura sube la demanda distinto de día que de noche);</li>
+<li>lee la ventana <strong>en orden</strong>, así que puede usar la forma de la curva reciente (si viene subiendo o bajando), no solo su nivel.</li>
+</ul>
+<p><strong>Evidencia (sección 11.1):</strong> sobre los mismos datos, la LSTM A obtiene RMSE ≈ 25 MW frente a ≈ 44 MW de la persistencia y supera también a una regresión lineal que ve exactamente la misma ventana (RMSE 29.6 MW, R² 0.87 vs 25.0 MW y R² 0.90 de la LSTM: <strong>15 % menos error</strong>). La diferencia con el modelo lineal es lo que aportan la no linealidad y la memoria.</p>
+<h3 id="2-qué-efecto-tiene-cambiar-la-ventana-temporal">2. ¿Qué efecto tiene cambiar la ventana temporal?</h3>
+<p>En las <strong>tres arquitecturas</strong>, la ventana de <strong>12 h fue la mejor y la de 48 h la peor</strong> (RMSE en prueba común: A 25.0 → 25.5 → 26.8 MW; B 24.8 → 25.7 → 26.1; C 25.3 → 25.5 → 27.3). Hay un compromiso:</p>
+<ul>
+<li><strong>Ventana más larga</strong> = más contexto, pero también más entradas que procesar, un gradiente que debe propagarse por más pasos y <strong>menos muestras de entrenamiento</strong> (cada dato inválido descarta <em>n</em> ventanas: 9 686 muestras con 12 h vs 4 504 con 48 h). Más parámetros efectivos por muestra → peor generalización (cociente prueba/entrenamiento 1.07 con 12 h vs 1.12 con 48 h en A y C).</li>
+<li><strong>Ventana más corta</strong> = menos contexto, pero aquí no hace falta más: el <strong>ciclo diario</strong> ya llega al modelo mediante la codificación cíclica de <code>hora</code> y <code>dia_semana</code>, y la información sobre el nivel actual de la demanda está en las últimas horas. Por eso 12 h basta.</li>
+</ul>
+<p>Una ventana demasiado corta (p. ej. 1-3 h) perdería la tendencia reciente; la elección óptima depende del problema y se debe validar, como se hizo aquí.</p>
+<h3 id="3-existe-sobreajuste">3. ¿Existe sobreajuste?</h3>
+<p><strong>No hay sobreajuste relevante</strong> en los modelos finales:</p>
+<ul>
+<li>El RMSE de prueba es solo <strong>3-12 % mayor</strong> que el de entrenamiento (cociente 1.03-1.12, sección 9), y validación y prueba quedan muy cerca entre sí.</li>
+<li>Las curvas de pérdida (sección 6) no muestran la &quot;U&quot; típica: la validación se estabiliza y Early Stopping corta antes de que empiece a subir.</li>
+<li>La A sin regularización muestra una brecha pequeña (pérdida de entrenamiento que sigue bajando mientras la de validación se aplana): un <strong>sobreajuste leve y controlado</strong>.</li>
+</ul>
+<p>El experimento de control confirma que el riesgo existía: <strong>la misma A entrenada 150 épocas sin Early Stopping sí sobreajusta</strong> (RMSE de entrenamiento 21.1 MW, pero de prueba 28.9 MW, un 15 % peor que con Early Stopping). Es decir, el sobreajuste se evitó gracias a las decisiones de entrenamiento, no porque fuera imposible.</p>
+<h3 id="4-qué-es-y-qué-efecto-tiene-dropout">4. ¿Qué es y qué efecto tiene Dropout?</h3>
+<p><strong>Dropout</strong> es una técnica de regularización que, <strong>durante el entrenamiento</strong>, apaga aleatoriamente una fracción <em>p</em> de las neuronas en cada paso (aquí <em>p</em> = 0.2, el 20 %) y escala las restantes para compensar. Al predecir se desactiva y se usa la red completa. Efectos:</p>
+<ul>
+<li>Obliga a que ninguna neurona dependa de otras específicas (evita la <strong>co-adaptación</strong>) y a aprender representaciones redundantes y robustas.</li>
+<li>Equivale a entrenar un <strong>conjunto de muchas subredes</strong> que comparten pesos y promediarlas al predecir.</li>
+<li>Reduce el sobreajuste a cambio de un entrenamiento algo más lento y ruidoso.</li>
+</ul>
+<p><strong>Evidencia (sección 10):</strong> quitar el Dropout a B redujo el error de entrenamiento pero <strong>amplió la brecha prueba-entrenamiento de 0.8 a 2.0 MW</strong> y empeoró el RMSE de prueba (24.7 → 25.3 MW). También explica por qué en B y C la pérdida de validación queda <em>por debajo</em> de la de entrenamiento: la de entrenamiento se mide con neuronas apagadas.</p>
+<h3 id="5-qué-es-y-qué-efecto-tiene-early-stopping">5. ¿Qué es y qué efecto tiene Early Stopping?</h3>
+<p><strong>Early Stopping</strong> vigila una métrica en validación (aquí <code>val_loss</code>) y <strong>detiene el entrenamiento cuando deja de mejorar</strong> durante un número de épocas (paciencia = 10). Con <code>restore_best_weights=True</code> devuelve los pesos de la mejor época, no los de la última. Efectos:</p>
+<ul>
+<li><strong>Evita el sobreajuste:</strong> corta justo cuando la red empieza a memorizar el ruido de entrenamiento.</li>
+<li><strong>Elige automáticamente el número de épocas</strong> (columna <em>Épocas</em> de la tabla: entre 42 y 66, con la mejor 10 épocas antes) y ahorra tiempo de cómputo.</li>
+</ul>
+<p><strong>Evidencia (sección 10):</strong> sin Early Stopping, a partir de la época ~35 la pérdida de validación <strong>sube</strong> mientras la de entrenamiento sigue bajando, y el RMSE de prueba empeora de <strong>25.0 a 28.9 MW</strong>.</p>
+<h3 id="6-más-neuronas-implican-necesariamente-mejores-resultados">6. ¿Más neuronas implican necesariamente mejores resultados?</h3>
+<p><strong>No.</strong> Lo muestran dos comparaciones:</p>
+<ul>
+<li><strong>Experimento de neuronas (A, 12 h):</strong> 8 neuronas (777 parámetros) → RMSE 25.2 MW; 32 neuronas (6 177) → 25.0 MW; 128 neuronas (73 857, <strong>95× más</strong>) → 24.9 MW. La mejora es de apenas 0.3 MW y la brecha de generalización crece de 0.4 a 2.0 MW.</li>
+<li><strong>Entre arquitecturas:</strong> B tiene 5× más parámetros que A y queda prácticamente empatada (24.8 vs 25.0 MW con 12 h, y peor que A en validación).</li>
+</ul>
+<p>Más capacidad solo ayuda mientras el modelo esté <strong>subajustado</strong>. Una vez que capta los patrones reales, el error restante es ruido que ninguna red puede predecir, y la capacidad extra se usa para memorizar ese ruido (sobreajuste), además de costar más cómputo y datos. El tamaño adecuado se encuentra validando, no maximizando.</p>
+<h3 id="7-qué-modelo-recomendaría-para-producción-y-por-qué">7. ¿Qué modelo recomendaría para producción y por qué?</h3>
+<p>Se recomienda <strong>A · LSTM base con ventana de 12 h</strong>:</p>
+<ul>
+<li><strong>Fue el mejor en validación</strong>, el criterio correcto de selección (el conjunto de prueba se reservó para estimar el error final: <strong>MAE 19.9 MW, RMSE 25.0 MW, MAPE 3.4 %, R² 0.90</strong>).</li>
+<li>Es el <strong>más simple y ligero</strong> (6 177 parámetros): inferencia instantánea, fácil de reentrenar, mantener y explicar.</li>
+<li>B quedó 0.2 MW mejor en prueba, una diferencia dentro del ruido que no justifica 5× más parámetros ni el doble de tiempo de entrenamiento. Ante un empate, el principio de parsimonia favorece al modelo simple.</li>
+<li>La ventana de 12 h fue la mejor en todas las arquitecturas y, en operación, <strong>requiere solo 12 horas de historia válida</strong>: es menos probable que un dato faltante impida generar la predicción que con 24 o 48 h.</li>
+</ul>
+<p>En producción debería acompañarse de monitoreo del error, validación de las entradas con las mismas reglas de limpieza y reentrenamiento periódico.</p>
+<h3 id="8-qué-variables-pueden-influir-más-en-la-demanda">8. ¿Qué variables pueden influir más en la demanda?</h3>
+<p>Según la <strong>importancia por permutación</strong> (sección 11.2), lo que más usa el modelo es el <strong>calendario</strong>: la <strong>hora del día</strong> (de lejos la más importante), el <strong>fin de semana</strong> y el <strong>día de la semana</strong>. Después vienen la <strong>radiación solar</strong>, los <strong>festivos</strong>, la <strong>demanda reciente</strong> y las variables climáticas (<strong>humedad, temperatura</strong>) y el <strong>precio</strong>. <strong>Viento, mes y precipitación</strong> casi no aportan.</p>
+<p>Esto coincide con el análisis exploratorio: la demanda tiene un perfil diario muy marcado, baja en fin de semana (correlación −0.49) y se relaciona con la temperatura (+0.48) y la radiación (−0.50).</p>
+<p>Dos matices:</p>
+<ul>
+<li>La importancia por permutación <strong>no es causalidad</strong>, y las variables correlacionadas se reparten la importancia. Por ejemplo, la radiación está muy ligada a la hora del día.</li>
+<li>La demanda reciente aparece más abajo de lo que su correlación sugiere (0.88) porque buena parte de esa información ya está contenida en el calendario y el clima: si se desordena la demanda, el modelo aún puede reconstruir el perfil esperado a partir de la hora y el día.</li>
+</ul>
+<p><code>mes</code> apenas importa porque el conjunto de prueba solo cubre septiembre-diciembre y la estacionalidad ya está representada por la temperatura y la radiación.</p>
+<h3 id="9-qué-limitaciones-tiene-el-modelo">9. ¿Qué limitaciones tiene el modelo?</h3>
+<ul>
+<li><strong>Festivos:</strong> el error medio en horas festivas es <strong>≈ 35 MW, casi el doble</strong> que en días normales (≈ 20 MW). Hay muy pocos ejemplos: solo <strong>8 días festivos (192 horas)</strong> en el periodo de entrenamiento, así que el modelo no aprende bien su comportamiento particular.</li>
+<li><strong>Datos faltantes en operación:</strong> como no se imputa, si alguna de las últimas 12 horas tiene un valor inválido <strong>no se puede generar la predicción</strong>. Un sistema real necesitaría un plan de contingencia (otro modelo, o alertar al operador).</li>
+<li><strong>Solo una hora adelante:</strong> predice <em>t+1</em>. Para planear el día siguiente habría que predecir de forma recursiva (los errores se acumulan) o entrenar un modelo multi-horizonte.</li>
+<li><strong>Sin pronósticos exógenos:</strong> usa clima observado hasta <em>t</em>, no pronósticos meteorológicos de <em>t+1</em>. Un cambio brusco del clima en la próxima hora no se anticipa.</li>
+<li><strong>Historia corta y estacionalidad anual poco vista:</strong> dos años de datos implican pocos ciclos de cada mes, y la prueba (sept-dic 2026) no evalúa todas las estaciones.</li>
+<li><strong>Picos extremos:</strong> ≈ 5 % de las horas tienen error &gt; 50 MW, en general en cambios bruscos que el modelo suaviza (se ve en el zoom de la sección 8.2: la curva predicha es más suave que la real).</li>
+<li><strong>Predicción puntual sin incertidumbre:</strong> entrega un único valor sin intervalo de confianza, útil saberlo para decisiones de despacho.</li>
+<li><strong>Deriva de los datos:</strong> si cambian los patrones de consumo (nuevas industrias, tarifas, autogeneración solar), el modelo debe reentrenarse; los parámetros de normalización también quedan fijos al periodo de entrenamiento.</li>
+</ul>
+<h2 id="13-conclusiones">13. Conclusiones</h2>
+<ol>
+<li>Tras una limpieza estricta y justificada, <strong>sin inventar valores</strong>, y un esquema cronológico sin fuga de información, las LSTM predicen la demanda de la siguiente hora con <strong>MAPE ≈ 3.4 % y R² ≈ 0.90</strong> en un periodo nunca visto, un <strong>43 % menos de error que la persistencia</strong>.</li>
+<li>La <strong>ventana de 12 h</strong> fue la mejor para las tres arquitecturas; ventanas más largas aportan poco contexto adicional y reducen las muestras disponibles.</li>
+<li>Las diferencias entre arquitecturas son pequeñas: <strong>la complejidad adicional (B, C) no se tradujo en mejoras relevantes</strong>, así que se recomienda la LSTM base por simplicidad y robustez.</li>
+<li><strong>Dropout y Early Stopping</strong> fueron determinantes para evitar el sobreajuste, como demostraron los experimentos de control.</li>
+<li>El modelo depende sobre todo del <strong>calendario</strong> (hora, fin de semana, día) y en segundo lugar del <strong>clima</strong> y la demanda reciente; su principal punto débil son los <strong>festivos</strong>.</li>
+</ol>
+</div>
+<div class="md"><h2 id="14-despliegue-en-una-app-web">14. Despliegue en una app web</h2>
+<p>El modelo seleccionado (<strong>A · LSTM base, ventana 12 h</strong>) se despliega en <strong>Vercel</strong> como una app web (carpeta <code>app_vercel/</code>):</p>
+<ul>
+<li><strong>Frontend</strong> (<code>index.html</code>, <code>app.js</code>): permite ingresar las variables independientes (x) de las últimas 12 horas, ya sea cargándolas desde el histórico, escribiéndolas a mano o subiendo un CSV, y muestra la predicción de la demanda de la hora siguiente (y) con su rango típico de error, la gráfica y, si existe, el valor real.</li>
+<li><strong>API</strong> (<code>api/predict.py</code>): función serverless de Python que valida las entradas con <strong>las mismas reglas de limpieza</strong> del notebook (si hay un valor faltante o fuera de rango, lo informa y no predice: no se inventan valores), construye las 15 variables por hora, normaliza con los parámetros de <strong>entrenamiento</strong> y ejecuta la LSTM.</li>
+<li><strong>Por qué NumPy y no TensorFlow en el servidor:</strong> TensorFlow pesa más de 500 MB y supera el límite de las funciones serverless (250 MB). Como la arquitectura A tiene solo 6 177 parámetros, se exportan sus pesos a JSON y el paso hacia adelante de la LSTM (compuertas de entrada, olvido, candidata y salida) se implementa en NumPy. La celda siguiente verifica que ambas implementaciones dan el mismo resultado.</li>
+</ul>
+</div>
+<pre class="salida">Verificación Keras vs. NumPy en 300 ventanas de prueba: diferencia máx. 0.0050 MW, media 0.0024 MW</pre>
+<div class="md"><p>Las diferencias son del orden de milésimas de MW, que corresponden al redondeo a 2 decimales que hace la API: <strong>la app reproduce exactamente el modelo entrenado.</strong></p>
+<p>Para probarla localmente: <code>python app_vercel/servidor_local.py</code> y abrir <code>http://localhost:8000</code>. Las instrucciones de despliegue están en el <code>README.md</code> del repositorio.</p>
+</div>
+    </main>
+  </div>
+
+  <footer class="contenedor pie">Taller LSTM · Predicción de demanda energética · <a href="./">Probar el modelo</a></footer>
+</body>
+</html>

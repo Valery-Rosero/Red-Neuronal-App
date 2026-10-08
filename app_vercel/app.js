@@ -115,7 +115,7 @@ function mostrarErrores(errores) {
 }
 
 /* ---------- predicción ---------- */
-async function predecir() {
+async function predecir(desplazar = true) {
   const btn = $("#btn-predecir");
   btn.disabled = true; btn.textContent = "Calculando…";
   try {
@@ -130,6 +130,7 @@ async function predecir() {
     if (!res.ok) { mostrarErrores(res.errores); return; }
     mostrarErrores([]);
     mostrarResultado(res);
+    if (desplazar) $("#sec-resultado").scrollIntoView({ behavior: "smooth", block: "nearest" });
   } catch (err) {
     mostrarErrores([{ fila: null, mensaje: `No se pudo contactar la API (${err.message}).` }]);
   } finally {
@@ -164,7 +165,6 @@ function mostrarResultado(res) {
   $("#r-delta").textContent = `${d >= 0 ? "+" : ""}${fmt(d)}`;
   $("#r-delta-pct").textContent = `${d >= 0 ? "Sube" : "Baja"} ${fmt(Math.abs(d) / actual * 100)} % respecto a ${estado.filas.at(-1).timestamp.slice(11)}`;
   graficar(pred, real, res.timestamp_objetivo);
-  $("#sec-resultado").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
@@ -225,7 +225,7 @@ async function cargarDesdeHistorico(t, auto = false) {
   fijarTInput(t);
   estado.filas = filas; estado.original = JSON.parse(JSON.stringify(filas));
   pintarTabla(); mostrarErrores([]);
-  if (auto) predecir();
+  if (auto) predecir(auto === "desplazar");
 }
 
 function ventanaValida(t) {
@@ -238,7 +238,7 @@ async function aleatorio() {
   const claves = [...estado.historico.keys()].filter((k) => k >= INICIO_PRUEBA);
   for (let intento = 0; intento < 200; intento++) {
     const t = claves[Math.floor(Math.random() * (claves.length - 1))];
-    if (ventanaValida(t)) return cargarDesdeHistorico(t, true);
+    if (ventanaValida(t)) return cargarDesdeHistorico(t, "desplazar");
   }
 }
 
@@ -340,5 +340,5 @@ $("#btn-restaurar").addEventListener("click", () => {
   $("#rng-dt").value = 0; $("#out-dt").textContent = "0"; $("#rng-rad").value = 100; $("#out-rad").textContent = "100";
   pintarTabla(); mostrarErrores([]);
 });
-$("#btn-predecir").addEventListener("click", predecir);
+$("#btn-predecir").addEventListener("click", () => predecir(true));
 iniciar();
