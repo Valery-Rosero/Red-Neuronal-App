@@ -4,99 +4,107 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Informe Taller LSTM</title>
-  <meta name="description" content="Informe del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
+  <meta name="description" content="Informe en normas APA del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    .barra-doc { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 24px auto 16px; max-width: 860px; }
+    /* Tinos es métricamente idéntica a Times New Roman: se usa si el equipo no tiene Times. */
+    .barra-doc { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 24px auto 16px; max-width: 8.5in; }
     .barra-doc p { margin: 0; color: var(--tinta-2); font-size: .9rem; }
     .barra-doc .grupo-botones a { text-decoration: none; }
     .ico-btn { width: 16px; height: 16px; margin-right: 6px; flex: none; }
-
-    /* ---------- hoja ---------- */
-    .papel {
-      background: #fff; color: #1b1b1a; max-width: 860px; margin: 0 auto 40px; border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 10px 40px rgba(0,0,0,.08); border: 1px solid var(--borde);
-      font-family: "Source Serif 4", Georgia, serif; font-size: 11.5pt; line-height: 1.6;
-    }
-    .papel section, .papel .portada, .papel .indice { padding: 56px 64px; }
-    .papel h1, .papel h2, .papel h3, .papel th, .papel figcaption, .papel .tabla-cap, .papel .portada { font-family: "Inter", system-ui, sans-serif; }
-    .papel h2 { font-size: 17pt; color: #0b0b0b; margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #2a78d6; letter-spacing: -.01em; display: block; }
-    .papel h3 { font-size: 12.5pt; color: #0b0b0b; margin: 22px 0 6px; }
-    .papel p, .papel li { color: #262624; text-align: justify; hyphens: auto; }
-    .papel strong { color: #0b0b0b; }
-    .papel a { color: #1c5cab; word-break: normal; overflow-wrap: break-word; hyphens: none; }
-    .papel table.datos td:first-child { white-space: nowrap; }
-    .papel table.datos.envolver td:first-child { white-space: normal; min-width: 150px; }
-    .papel table.datos th { white-space: nowrap; }
-    .papel code { font-size: .85em; background: #f0efec; color: #0b0b0b; padding: .05em .3em; border-radius: 3px; }
-    .papel table { width: 100%; border-collapse: collapse; font-size: 9.5pt; line-height: 1.4; margin: 10px 0 6px; font-family: "Inter", sans-serif; }
-    .papel th { background: #eaf2fd; color: #0b0b0b; text-align: left; font-weight: 600; padding: 6px 8px; border-bottom: 1.5px solid #2a78d6; }
-    .papel td { padding: 5px 8px; border-bottom: 1px solid #e2e1dc; vertical-align: top; color: #262624; }
-    .papel td.n, .papel th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .papel tr.destacado td { background: #f3f8fe; font-weight: 600; color: #0b0b0b; }
-    .papel tr.referencia td { color: #6b6a66; font-style: italic; }
-    .papel figure { margin: 18px 0; text-align: center; }
-    .papel figure img { max-width: 100%; height: auto; border: 1px solid #ecebe7; border-radius: 4px; }
-    .papel figcaption, .papel .tabla-cap { font-size: 8.8pt; color: #52514e; margin-top: 6px; text-align: left; line-height: 1.45; }
-    .papel .tabla-cap { margin: 14px 0 0; }
-    .papel .tabla-wrap { overflow-x: auto; }
-
-    /* ---------- portada ---------- */
-    .portada { min-height: 1050px; display: flex; flex-direction: column; justify-content: space-between; color: #0b0b0b; position: relative; }
-    .portada .franja { position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: linear-gradient(#2a78d6, #1baf7a); border-radius: 6px 0 0 6px; }
-    .portada .sup { display: flex; align-items: center; gap: 12px; font-size: 10pt; color: #52514e; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-    .portada .sup svg { color: #2a78d6; }
-    .portada .centro { margin: auto 0; padding: 40px 0; }
-    .portada .tipo { color: #2a78d6; font-weight: 600; font-size: 11pt; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 14px; }
-    .portada h1 { font-size: 30pt; line-height: 1.12; letter-spacing: -.025em; margin: 0 0 18px; color: #0b0b0b; }
-    .portada .sub { font-size: 13pt; color: #52514e; max-width: 560px; margin: 0; font-family: "Source Serif 4", serif; text-align: left; }
-    .portada .curva { margin: 36px 0 0; width: 100%; height: 90px; }
-    .portada .datos { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 32px; border-top: 1px solid #e2e1dc; padding-top: 28px; }
-    .portada .datos .et { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .1em; color: #898781; font-weight: 600; margin-bottom: 4px; }
-    .portada .datos .va { font-size: 11.5pt; font-weight: 500; color: #0b0b0b; line-height: 1.5; }
-    .portada .datos .va a { color: #1c5cab; font-weight: 500; }
-    .portada .datos .ancho { grid-column: 1 / -1; }
-
-    /* ---------- índice ---------- */
-    .indice h2 { margin-top: 0; }
-    .indice ol { list-style: none; padding: 0; margin: 0; columns: 1; }
-    .indice li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dotted #d6d5d0; font-family: "Inter", sans-serif; font-size: 10.5pt; }
-    .indice li a { color: #0b0b0b; text-decoration: none; word-break: normal; }
-    .indice li a:hover { color: #2a78d6; }
-
-    @media (max-width: 700px) {
-      .papel section, .papel .portada, .papel .indice { padding: 28px 20px; }
-      .portada { min-height: auto; }
-      .portada h1 { font-size: 22pt; }
-      .portada .datos { grid-template-columns: 1fr; }
-      .papel p, .papel li { text-align: left; }
+    .doc-grid { display: grid; grid-template-columns: minmax(0, 8.5in); justify-content: center; gap: 28px; }
+    .indice-pantalla { display: none; }
+    @media (min-width: 1240px) {
+      .doc-grid { grid-template-columns: 210px minmax(0, 8.5in); }
+      .indice-pantalla { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 72px; align-self: start;
+        max-height: calc(100vh - 90px); overflow-y: auto; font-size: .82rem; }
+      .indice-pantalla a { color: var(--tinta-2); text-decoration: none; padding: 4px 8px; border-radius: 6px; border-left: 2px solid transparent; }
+      .indice-pantalla a:hover { background: var(--superficie-2); color: var(--tinta); border-left-color: var(--acento); }
+      .indice-pantalla a.n2 { padding-left: 18px; font-size: .78rem; }
+      .barra-doc { max-width: calc(8.5in + 238px); padding-left: 238px; }
     }
 
-    /* ---------- impresión / PDF ---------- */
-    @page { size: A4; margin: 18mm 17mm 20mm; }
+    /* ---------- hoja APA (estudiante, 7.ª ed.) ---------- */
+    .apa {
+      background: #fff; color: #000; margin: 0 0 40px; border: 1px solid var(--borde);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 10px 40px rgba(0,0,0,.08);
+      font-family: "Times New Roman", Tinos, Times, serif; font-size: 12pt; line-height: 2;
+    }
+    .apa .pagina { padding: 1in; position: relative; }
+    .apa .pagina + .pagina { border-top: 1px dashed #d6d5d0; }
+    .apa .num-pag { position: absolute; top: .5in; right: 1in; }
+    .apa p { margin: 0; text-indent: .5in; text-align: left; }
+    .apa li { text-align: left; }
+    .apa ul, .apa ol { margin: 0; padding-left: 1in; }
+    .apa h2, .apa h3, .apa h4 { font-family: inherit; font-size: 12pt; line-height: 2; margin: 0; color: #000; display: block; }
+    .apa h2 { text-align: center; font-weight: 700; }                       /* nivel 1 */
+    .apa h3 { text-align: left; font-weight: 700; }                         /* nivel 2 */
+    .apa h4 { text-align: left; font-weight: 700; font-style: italic; }     /* nivel 3 */
+    .apa a { color: #000; text-decoration: none; word-break: normal; overflow-wrap: anywhere; }
+    .apa code { font-family: "Courier New", monospace; font-size: 10.5pt; }
+    .apa strong { font-weight: 700; }
+
+    /* portada */
+    .apa .portada { text-align: center; }
+    .apa .portada .bloque { padding-top: 1.6in; }
+    .apa .portada p { text-indent: 0; text-align: center; }
+    .apa .portada .titulo { font-weight: 700; margin-bottom: 2em; }
+    .apa .portada .enlaces { margin-top: 2em; }
+    .apa .portada .enlaces a { color: #000; }
+
+    /* resumen */
+    .apa .resumen p { text-indent: 0; }
+    .apa .resumen p.palabras { text-indent: .5in; }
+
+    /* tablas APA: número en negrita, título en cursiva, solo líneas horizontales */
+    .apa .tabla-apa, .apa figure { margin: 1em 0; break-inside: avoid; }
+    .apa .t-num { font-weight: 700; text-indent: 0; }
+    .apa .t-tit { font-style: italic; text-indent: 0; margin-bottom: 0; }
+    .apa table { width: 100%; border-collapse: collapse; font-size: 10.5pt; line-height: 1.3; margin: 4px 0 0;
+      border-top: 1px solid #000; border-bottom: 1px solid #000; }
+    .apa th { font-weight: 400; text-align: left; padding: 5px 6px; border-bottom: 1px solid #000; vertical-align: bottom; }
+    .apa td { padding: 4px 6px; vertical-align: top; text-align: left; }
+    .apa td.n, .apa th.n { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .apa table.datos td:first-child { white-space: nowrap; }
+    .apa table.datos.envolver td:first-child { white-space: normal; min-width: 1.6in; }
+    .apa .nota { text-indent: 0; font-size: 10.5pt; line-height: 1.5; margin-top: 4px; }
+    .apa .tabla-wrap { overflow-x: auto; }
+
+    /* figuras APA */
+    .apa figure { text-align: left; }
+    .apa figure img { display: block; max-width: 100%; height: auto; margin: 6px auto 0; }
+
+    /* referencias: sangría francesa */
+    .apa .referencias p { text-indent: -.5in; padding-left: .5in; }
+    .apa .referencias a { overflow-wrap: anywhere; }
+
+    @media (max-width: 760px) {
+      .apa .pagina { padding: 28px 18px; }
+      .apa .num-pag { top: 8px; right: 18px; }
+      .apa .portada .bloque { padding-top: 40px; }
+      .apa ul, .apa ol { padding-left: 1.4em; }
+      .apa p { text-indent: 1.4em; }
+    }
+
+    /* ---------- impresión / PDF: carta, márgenes de 2,54 cm ---------- */
+    @page { size: letter; margin: 1in; }
     @media print {
       :root { color-scheme: light; }
       body { background: #fff !important; }
-      .nav, .barra-doc, .pie { display: none !important; }
+      .nav, .barra-doc, .pie, .indice-pantalla { display: none !important; }
       .contenedor { padding: 0; max-width: none; }
-      .papel { box-shadow: none; border: 0; margin: 0; max-width: none; border-radius: 0; font-size: 10.5pt; }
-      .papel section, .papel .indice { padding: 0; }
-      .portada { padding: 0 0 0 18px !important; min-height: 255mm; height: 255mm; break-after: page; }
-      .portada .franja { border-radius: 0; left: -2px; }
-      .indice { break-after: page; }
-      .papel h2 { margin-top: 0; padding-top: 2mm; }
-      .papel section + section { margin-top: 8mm; }
-      .papel section.nueva-pagina { break-before: page; margin-top: 0; }
-      .papel h2, .papel h3 { break-after: avoid; }
-      .papel figure, .papel table, .papel .tabla-cap { break-inside: avoid; }
-      .papel .tabla-cap { break-after: avoid; }
-      .papel figure img { max-height: 180mm; }
-      .papel table { font-size: 8.8pt; }
-      .papel .tabla-wrap { overflow: visible; }
-      .papel a { color: #1c5cab; }
+      .doc-grid { display: block; }
+      .apa { border: 0; box-shadow: none; margin: 0; }
+      .apa .pagina { padding: 0; border: 0 !important; }
+      .apa .num-pag { display: none; }               /* el número lo pone el encabezado del PDF */
+      .apa .pagina + .pagina { break-before: page; }
+      .apa .portada { height: 9in; }
+      .apa h2, .apa h3, .apa h4, .apa .t-num, .apa .t-tit { break-after: avoid; }
+      .apa table, .apa figure, .apa .tabla-apa { break-inside: avoid; }
+      .apa figure img { max-height: 6.2in; }
     }
   </style>
 </head>
@@ -114,7 +122,7 @@
 
   <div class="contenedor">
     <div class="barra-doc">
-      <p>Informe completo del taller, listo para entregar.</p>
+      <p>Informe en normas APA (7.ª edición), listo para entregar.</p>
       <div class="grupo-botones">
         <a class="btn" href="Informe_Taller_LSTM.pdf" download>
           <svg class="ico-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Descargar PDF</a>
@@ -123,35 +131,25 @@
       </div>
     </div>
 
-    <article class="papel">
-      <div class="portada">
-        <div class="franja"></div>
-        <div class="sup">
-          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="currentColor"/><path d="M13.2 4.5 7 13.2h4.4l-.9 6.3 6.3-8.9h-4.5z" fill="#fff"/></svg>
-          Inteligencia Artificial
+    <div class="doc-grid">
+      <nav class="indice-pantalla" aria-label="Contenido del informe">{{INDICE}}</nav>
+      <article class="apa">
+        <div class="pagina portada">
+          <div class="bloque">
+            <p class="titulo">{{TITULO}}</p>
+            <p>Valery Nickol Rosero Molina y Johan David Delgado</p>
+            <p>Inteligencia Artificial</p>
+            <p>Dr. Cristian Camilo Ordoñez Quintero</p>
+            <p>{{FECHA}}</p>
+            <div class="enlaces">
+              <p>Repositorio del proyecto: <a href="{{REPO}}">{{REPO}}</a></p>
+              <p>Aplicación web: <a href="{{APP}}">{{APP}}</a></p>
+            </div>
+          </div>
         </div>
-        <div class="centro">
-          <p class="tipo">Informe de taller</p>
-          <h1>Diseño de una arquitectura LSTM para predicción de demanda energética</h1>
-          <p class="sub">Diseño, implementación, comparación y despliegue de redes neuronales LSTM para predecir la demanda eléctrica de la hora siguiente a partir de información histórica multivariada.</p>
-          {{CURVA}}
-        </div>
-        <div class="datos">
-          <div class="ancho"><div class="et">Presentado por</div><div class="va">Valery Nickol Rosero Molina<br>Johan David Delgado</div></div>
-          <div><div class="et">Docente</div><div class="va">Cristian Ordoñez</div></div>
-          <div><div class="et">Fecha</div><div class="va">{{FECHA}}</div></div>
-          <div class="ancho"><div class="et">Repositorio del proyecto (GitHub)</div><div class="va"><a href="{{REPO}}">{{REPO}}</a></div></div>
-          <div class="ancho"><div class="et">Aplicación web</div><div class="va"><a href="{{APP}}">{{APP}}</a></div></div>
-        </div>
-      </div>
-
-      <div class="indice">
-        <h2>Contenido</h2>
-        <ol>{{INDICE}}</ol>
-      </div>
-
-      {{CUERPO}}
-    </article>
+        {{CUERPO}}
+      </article>
+    </div>
   </div>
 
   <footer class="contenedor pie">Taller LSTM · Valery Nickol Rosero Molina y Johan David Delgado · <a href="{{REPO}}">Repositorio en GitHub</a></footer>

@@ -4,99 +4,107 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Informe Taller LSTM</title>
-  <meta name="description" content="Informe del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
+  <meta name="description" content="Informe en normas APA del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    .barra-doc { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 24px auto 16px; max-width: 860px; }
+    /* Tinos es métricamente idéntica a Times New Roman: se usa si el equipo no tiene Times. */
+    .barra-doc { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 24px auto 16px; max-width: 8.5in; }
     .barra-doc p { margin: 0; color: var(--tinta-2); font-size: .9rem; }
     .barra-doc .grupo-botones a { text-decoration: none; }
     .ico-btn { width: 16px; height: 16px; margin-right: 6px; flex: none; }
-
-    /* ---------- hoja ---------- */
-    .papel {
-      background: #fff; color: #1b1b1a; max-width: 860px; margin: 0 auto 40px; border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 10px 40px rgba(0,0,0,.08); border: 1px solid var(--borde);
-      font-family: "Source Serif 4", Georgia, serif; font-size: 11.5pt; line-height: 1.6;
-    }
-    .papel section, .papel .portada, .papel .indice { padding: 56px 64px; }
-    .papel h1, .papel h2, .papel h3, .papel th, .papel figcaption, .papel .tabla-cap, .papel .portada { font-family: "Inter", system-ui, sans-serif; }
-    .papel h2 { font-size: 17pt; color: #0b0b0b; margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #2a78d6; letter-spacing: -.01em; display: block; }
-    .papel h3 { font-size: 12.5pt; color: #0b0b0b; margin: 22px 0 6px; }
-    .papel p, .papel li { color: #262624; text-align: justify; hyphens: auto; }
-    .papel strong { color: #0b0b0b; }
-    .papel a { color: #1c5cab; word-break: normal; overflow-wrap: break-word; hyphens: none; }
-    .papel table.datos td:first-child { white-space: nowrap; }
-    .papel table.datos.envolver td:first-child { white-space: normal; min-width: 150px; }
-    .papel table.datos th { white-space: nowrap; }
-    .papel code { font-size: .85em; background: #f0efec; color: #0b0b0b; padding: .05em .3em; border-radius: 3px; }
-    .papel table { width: 100%; border-collapse: collapse; font-size: 9.5pt; line-height: 1.4; margin: 10px 0 6px; font-family: "Inter", sans-serif; }
-    .papel th { background: #eaf2fd; color: #0b0b0b; text-align: left; font-weight: 600; padding: 6px 8px; border-bottom: 1.5px solid #2a78d6; }
-    .papel td { padding: 5px 8px; border-bottom: 1px solid #e2e1dc; vertical-align: top; color: #262624; }
-    .papel td.n, .papel th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .papel tr.destacado td { background: #f3f8fe; font-weight: 600; color: #0b0b0b; }
-    .papel tr.referencia td { color: #6b6a66; font-style: italic; }
-    .papel figure { margin: 18px 0; text-align: center; }
-    .papel figure img { max-width: 100%; height: auto; border: 1px solid #ecebe7; border-radius: 4px; }
-    .papel figcaption, .papel .tabla-cap { font-size: 8.8pt; color: #52514e; margin-top: 6px; text-align: left; line-height: 1.45; }
-    .papel .tabla-cap { margin: 14px 0 0; }
-    .papel .tabla-wrap { overflow-x: auto; }
-
-    /* ---------- portada ---------- */
-    .portada { min-height: 1050px; display: flex; flex-direction: column; justify-content: space-between; color: #0b0b0b; position: relative; }
-    .portada .franja { position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: linear-gradient(#2a78d6, #1baf7a); border-radius: 6px 0 0 6px; }
-    .portada .sup { display: flex; align-items: center; gap: 12px; font-size: 10pt; color: #52514e; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-    .portada .sup svg { color: #2a78d6; }
-    .portada .centro { margin: auto 0; padding: 40px 0; }
-    .portada .tipo { color: #2a78d6; font-weight: 600; font-size: 11pt; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 14px; }
-    .portada h1 { font-size: 30pt; line-height: 1.12; letter-spacing: -.025em; margin: 0 0 18px; color: #0b0b0b; }
-    .portada .sub { font-size: 13pt; color: #52514e; max-width: 560px; margin: 0; font-family: "Source Serif 4", serif; text-align: left; }
-    .portada .curva { margin: 36px 0 0; width: 100%; height: 90px; }
-    .portada .datos { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 32px; border-top: 1px solid #e2e1dc; padding-top: 28px; }
-    .portada .datos .et { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .1em; color: #898781; font-weight: 600; margin-bottom: 4px; }
-    .portada .datos .va { font-size: 11.5pt; font-weight: 500; color: #0b0b0b; line-height: 1.5; }
-    .portada .datos .va a { color: #1c5cab; font-weight: 500; }
-    .portada .datos .ancho { grid-column: 1 / -1; }
-
-    /* ---------- índice ---------- */
-    .indice h2 { margin-top: 0; }
-    .indice ol { list-style: none; padding: 0; margin: 0; columns: 1; }
-    .indice li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dotted #d6d5d0; font-family: "Inter", sans-serif; font-size: 10.5pt; }
-    .indice li a { color: #0b0b0b; text-decoration: none; word-break: normal; }
-    .indice li a:hover { color: #2a78d6; }
-
-    @media (max-width: 700px) {
-      .papel section, .papel .portada, .papel .indice { padding: 28px 20px; }
-      .portada { min-height: auto; }
-      .portada h1 { font-size: 22pt; }
-      .portada .datos { grid-template-columns: 1fr; }
-      .papel p, .papel li { text-align: left; }
+    .doc-grid { display: grid; grid-template-columns: minmax(0, 8.5in); justify-content: center; gap: 28px; }
+    .indice-pantalla { display: none; }
+    @media (min-width: 1240px) {
+      .doc-grid { grid-template-columns: 210px minmax(0, 8.5in); }
+      .indice-pantalla { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 72px; align-self: start;
+        max-height: calc(100vh - 90px); overflow-y: auto; font-size: .82rem; }
+      .indice-pantalla a { color: var(--tinta-2); text-decoration: none; padding: 4px 8px; border-radius: 6px; border-left: 2px solid transparent; }
+      .indice-pantalla a:hover { background: var(--superficie-2); color: var(--tinta); border-left-color: var(--acento); }
+      .indice-pantalla a.n2 { padding-left: 18px; font-size: .78rem; }
+      .barra-doc { max-width: calc(8.5in + 238px); padding-left: 238px; }
     }
 
-    /* ---------- impresión / PDF ---------- */
-    @page { size: A4; margin: 18mm 17mm 20mm; }
+    /* ---------- hoja APA (estudiante, 7.ª ed.) ---------- */
+    .apa {
+      background: #fff; color: #000; margin: 0 0 40px; border: 1px solid var(--borde);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 10px 40px rgba(0,0,0,.08);
+      font-family: "Times New Roman", Tinos, Times, serif; font-size: 12pt; line-height: 2;
+    }
+    .apa .pagina { padding: 1in; position: relative; }
+    .apa .pagina + .pagina { border-top: 1px dashed #d6d5d0; }
+    .apa .num-pag { position: absolute; top: .5in; right: 1in; }
+    .apa p { margin: 0; text-indent: .5in; text-align: left; }
+    .apa li { text-align: left; }
+    .apa ul, .apa ol { margin: 0; padding-left: 1in; }
+    .apa h2, .apa h3, .apa h4 { font-family: inherit; font-size: 12pt; line-height: 2; margin: 0; color: #000; display: block; }
+    .apa h2 { text-align: center; font-weight: 700; }                       /* nivel 1 */
+    .apa h3 { text-align: left; font-weight: 700; }                         /* nivel 2 */
+    .apa h4 { text-align: left; font-weight: 700; font-style: italic; }     /* nivel 3 */
+    .apa a { color: #000; text-decoration: none; word-break: normal; overflow-wrap: anywhere; }
+    .apa code { font-family: "Courier New", monospace; font-size: 10.5pt; }
+    .apa strong { font-weight: 700; }
+
+    /* portada */
+    .apa .portada { text-align: center; }
+    .apa .portada .bloque { padding-top: 1.6in; }
+    .apa .portada p { text-indent: 0; text-align: center; }
+    .apa .portada .titulo { font-weight: 700; margin-bottom: 2em; }
+    .apa .portada .enlaces { margin-top: 2em; }
+    .apa .portada .enlaces a { color: #000; }
+
+    /* resumen */
+    .apa .resumen p { text-indent: 0; }
+    .apa .resumen p.palabras { text-indent: .5in; }
+
+    /* tablas APA: número en negrita, título en cursiva, solo líneas horizontales */
+    .apa .tabla-apa, .apa figure { margin: 1em 0; break-inside: avoid; }
+    .apa .t-num { font-weight: 700; text-indent: 0; }
+    .apa .t-tit { font-style: italic; text-indent: 0; margin-bottom: 0; }
+    .apa table { width: 100%; border-collapse: collapse; font-size: 10.5pt; line-height: 1.3; margin: 4px 0 0;
+      border-top: 1px solid #000; border-bottom: 1px solid #000; }
+    .apa th { font-weight: 400; text-align: left; padding: 5px 6px; border-bottom: 1px solid #000; vertical-align: bottom; }
+    .apa td { padding: 4px 6px; vertical-align: top; text-align: left; }
+    .apa td.n, .apa th.n { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .apa table.datos td:first-child { white-space: nowrap; }
+    .apa table.datos.envolver td:first-child { white-space: normal; min-width: 1.6in; }
+    .apa .nota { text-indent: 0; font-size: 10.5pt; line-height: 1.5; margin-top: 4px; }
+    .apa .tabla-wrap { overflow-x: auto; }
+
+    /* figuras APA */
+    .apa figure { text-align: left; }
+    .apa figure img { display: block; max-width: 100%; height: auto; margin: 6px auto 0; }
+
+    /* referencias: sangría francesa */
+    .apa .referencias p { text-indent: -.5in; padding-left: .5in; }
+    .apa .referencias a { overflow-wrap: anywhere; }
+
+    @media (max-width: 760px) {
+      .apa .pagina { padding: 28px 18px; }
+      .apa .num-pag { top: 8px; right: 18px; }
+      .apa .portada .bloque { padding-top: 40px; }
+      .apa ul, .apa ol { padding-left: 1.4em; }
+      .apa p { text-indent: 1.4em; }
+    }
+
+    /* ---------- impresión / PDF: carta, márgenes de 2,54 cm ---------- */
+    @page { size: letter; margin: 1in; }
     @media print {
       :root { color-scheme: light; }
       body { background: #fff !important; }
-      .nav, .barra-doc, .pie { display: none !important; }
+      .nav, .barra-doc, .pie, .indice-pantalla { display: none !important; }
       .contenedor { padding: 0; max-width: none; }
-      .papel { box-shadow: none; border: 0; margin: 0; max-width: none; border-radius: 0; font-size: 10.5pt; }
-      .papel section, .papel .indice { padding: 0; }
-      .portada { padding: 0 0 0 18px !important; min-height: 255mm; height: 255mm; break-after: page; }
-      .portada .franja { border-radius: 0; left: -2px; }
-      .indice { break-after: page; }
-      .papel h2 { margin-top: 0; padding-top: 2mm; }
-      .papel section + section { margin-top: 8mm; }
-      .papel section.nueva-pagina { break-before: page; margin-top: 0; }
-      .papel h2, .papel h3 { break-after: avoid; }
-      .papel figure, .papel table, .papel .tabla-cap { break-inside: avoid; }
-      .papel .tabla-cap { break-after: avoid; }
-      .papel figure img { max-height: 180mm; }
-      .papel table { font-size: 8.8pt; }
-      .papel .tabla-wrap { overflow: visible; }
-      .papel a { color: #1c5cab; }
+      .doc-grid { display: block; }
+      .apa { border: 0; box-shadow: none; margin: 0; }
+      .apa .pagina { padding: 0; border: 0 !important; }
+      .apa .num-pag { display: none; }               /* el número lo pone el encabezado del PDF */
+      .apa .pagina + .pagina { break-before: page; }
+      .apa .portada { height: 9in; }
+      .apa h2, .apa h3, .apa h4, .apa .t-num, .apa .t-tit { break-after: avoid; }
+      .apa table, .apa figure, .apa .tabla-apa { break-inside: avoid; }
+      .apa figure img { max-height: 6.2in; }
     }
   </style>
 </head>
@@ -114,7 +122,7 @@
 
   <div class="contenedor">
     <div class="barra-doc">
-      <p>Informe completo del taller, listo para entregar.</p>
+      <p>Informe en normas APA (7.ª edición), listo para entregar.</p>
       <div class="grupo-botones">
         <a class="btn" href="Informe_Taller_LSTM.pdf" download>
           <svg class="ico-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Descargar PDF</a>
@@ -123,76 +131,42 @@
       </div>
     </div>
 
-    <article class="papel">
-      <div class="portada">
-        <div class="franja"></div>
-        <div class="sup">
-          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="currentColor"/><path d="M13.2 4.5 7 13.2h4.4l-.9 6.3 6.3-8.9h-4.5z" fill="#fff"/></svg>
-          Inteligencia Artificial
+    <div class="doc-grid">
+      <nav class="indice-pantalla" aria-label="Contenido del informe"><a class="" href="#resumen">Resumen</a><a class="" href="#diseño-de-una-arquitectura-lstm-para-la-predicción-de-demanda-energética">Diseño de una arquitectura LSTM para la predicción de demanda energética</a><a class="n2" href="#objetivos">Objetivos</a><a class="" href="#descripción-del-problema-y-del-conjunto-de-datos">Descripción del problema y del conjunto de datos</a><a class="" href="#calidad-de-los-datos-y-reglas-de-limpieza">Calidad de los datos y reglas de limpieza</a><a class="n2" href="#problemas-detectados">Problemas detectados</a><a class="n2" href="#reglas-de-limpieza">Reglas de limpieza</a><a class="" href="#análisis-exploratorio">Análisis exploratorio</a><a class="" href="#metodología">Metodología</a><a class="n2" href="#variables-de-entrada">Variables de entrada</a><a class="n2" href="#separación-cronológica-y-normalización">Separación cronológica y normalización</a><a class="n2" href="#construcción-de-las-ventanas">Construcción de las ventanas</a><a class="n2" href="#cumplimiento-de-las-condiciones-del-taller">Cumplimiento de las condiciones del taller</a><a class="" href="#diseño-de-las-arquitecturas">Diseño de las arquitecturas</a><a class="" href="#entrenamiento">Entrenamiento</a><a class="" href="#resultados">Resultados</a><a class="n2" href="#métricas">Métricas</a><a class="n2" href="#tabla-de-resultados">Tabla de resultados</a><a class="n2" href="#selección-del-modelo">Selección del modelo</a><a class="n2" href="#demanda-real-frente-a-predicha">Demanda real frente a predicha</a><a class="n2" href="#error-de-predicción">Error de predicción</a><a class="" href="#sobreajuste-y-generalización">Sobreajuste y generalización</a><a class="" href="#experimentos-de-control">Experimentos de control</a><a class="" href="#evidencia-adicional">Evidencia adicional</a><a class="n2" href="#comparación-con-modelos-de-referencia">Comparación con modelos de referencia</a><a class="n2" href="#importancia-de-las-variables">Importancia de las variables</a><a class="n2" href="#dónde-se-equivoca-más-el-modelo">Dónde se equivoca más el modelo</a><a class="" href="#preguntas-de-análisis">Preguntas de análisis</a><a class="n2" href="#por-qué-lstm-es-apropiada-para-este-problema">¿Por qué LSTM es apropiada para este problema?</a><a class="n2" href="#qué-efecto-tiene-cambiar-la-ventana-temporal">¿Qué efecto tiene cambiar la ventana temporal?</a><a class="n2" href="#existe-sobreajuste">¿Existe sobreajuste?</a><a class="n2" href="#qué-es-y-qué-efecto-tiene-dropout">¿Qué es y qué efecto tiene Dropout?</a><a class="n2" href="#qué-es-y-qué-efecto-tiene-early-stopping">¿Qué es y qué efecto tiene Early Stopping?</a><a class="n2" href="#más-neuronas-implican-necesariamente-mejores-resultados">¿Más neuronas implican necesariamente mejores resultados?</a><a class="n2" href="#qué-modelo-recomendaría-para-producción-y-por-qué">¿Qué modelo recomendaría para producción y por qué?</a><a class="n2" href="#qué-variables-pueden-influir-más-en-la-demanda">¿Qué variables pueden influir más en la demanda?</a><a class="n2" href="#qué-limitaciones-tiene-el-modelo">¿Qué limitaciones tiene el modelo?</a><a class="" href="#despliegue">Despliegue</a><a class="" href="#conclusiones">Conclusiones</a><a class="" href="#referencias">Referencias</a></nav>
+      <article class="apa">
+        <div class="pagina portada">
+          <div class="bloque">
+            <p class="titulo">Diseño de una arquitectura LSTM para la predicción de demanda energética</p>
+            <p>Valery Nickol Rosero Molina y Johan David Delgado</p>
+            <p>Inteligencia Artificial</p>
+            <p>Dr. Cristian Camilo Ordoñez Quintero</p>
+            <p>7 de octubre de 2026</p>
+            <div class="enlaces">
+              <p>Repositorio del proyecto: <a href="https://github.com/Valery-Rosero/Red-Neuronal-App">https://github.com/Valery-Rosero/Red-Neuronal-App</a></p>
+              <p>Aplicación web: <a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a></p>
+            </div>
+          </div>
         </div>
-        <div class="centro">
-          <p class="tipo">Informe de taller</p>
-          <h1>Diseño de una arquitectura LSTM para predicción de demanda energética</h1>
-          <p class="sub">Diseño, implementación, comparación y despliegue de redes neuronales LSTM para predecir la demanda eléctrica de la hora siguiente a partir de información histórica multivariada.</p>
-          <svg class="curva" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a78d6" stop-opacity=".18"/><stop offset="1" stop-color="#2a78d6" stop-opacity="0"/></linearGradient></defs><path d="M0.0,40.7 L3.6,39.3 L7.2,38.7 L10.8,34.5 L14.4,31.2 L18.0,28.0 L21.6,29.5 L25.1,17.5 L28.7,23.4 L32.3,25.5 L35.9,38.9 L39.5,60.5 L43.1,62.6 L46.7,45.2 L50.3,47.8 L53.9,47.6 L57.5,26.5 L61.1,33.5 L64.7,17.0 L68.3,8.4 L71.9,13.2 L75.4,14.8 L79.0,18.6 L82.6,28.6 L86.2,46.1 L89.8,28.5 L93.4,38.2 L97.0,38.1 L100.6,42.6 L104.2,29.3 L107.8,33.0 L111.4,25.9 L115.0,29.9 L118.6,34.3 L122.2,44.0 L125.7,60.4 L129.3,54.9 L132.9,53.8 L136.5,54.5 L140.1,33.4 L143.7,42.7 L147.3,21.6 L150.9,9.9 L154.5,14.1 L158.1,9.4 L161.7,24.8 L165.3,29.2 L168.9,31.0 L172.5,40.8 L176.0,38.5 L179.6,46.3 L183.2,28.7 L186.8,32.1 L190.4,29.1 L194.0,26.5 L197.6,30.7 L201.2,18.4 L204.8,30.1 L208.4,49.3 L212.0,55.8 L215.6,52.5 L219.2,54.7 L222.8,51.7 L226.3,57.6 L229.9,36.9 L233.5,28.6 L237.1,20.0 L240.7,12.3 L244.3,15.9 L247.9,30.3 L251.5,27.3 L255.1,28.4 L258.7,34.6 L262.3,33.1 L265.9,40.9 L269.5,39.2 L273.1,40.3 L276.6,40.7 L280.2,22.6 L283.8,24.2 L287.4,25.6 L291.0,24.7 L294.6,42.9 L298.2,46.7 L301.8,58.6 L305.4,48.2 L309.0,47.5 L312.6,56.3 L316.2,41.4 L319.8,25.8 L323.4,17.4 L326.9,6.0 L330.5,7.1 L334.1,23.5 L337.7,29.3 L341.3,31.1 L344.9,28.7 L348.5,33.1 L352.1,38.1 L355.7,39.3 L359.3,32.3 L362.9,29.1 L366.5,23.5 L370.1,28.7 L373.7,25.0 L377.2,30.7 L380.8,44.2 L384.4,45.6 L388.0,49.5 L391.6,56.0 L395.2,50.8 L398.8,54.1 L402.4,36.1 L406.0,16.6 L409.6,8.0 L413.2,21.1 L416.8,15.3 L420.4,19.2 L424.0,39.5 L427.5,31.4 L431.1,71.8 L434.7,65.1 L438.3,63.8 L441.9,64.9 L445.5,60.2 L449.1,65.7 L452.7,45.8 L456.3,48.1 L459.9,46.8 L463.5,48.7 L467.1,57.7 L470.7,74.0 L474.3,75.9 L477.8,70.2 L481.4,84.0 L485.0,72.7 L488.6,66.3 L492.2,50.8 L495.8,41.8 L499.4,35.8 L503.0,34.3 L506.6,49.2 L510.2,45.9 L513.8,57.0 L517.4,64.2 L521.0,64.8 L524.6,62.6 L528.1,64.4 L531.7,65.0 L535.3,56.8 L538.9,50.5 L542.5,45.0 L546.1,41.1 L549.7,55.6 L553.3,70.6 L556.9,75.2 L560.5,67.4 L564.1,68.5 L567.7,72.9 L571.3,62.1 L574.9,60.3 L578.4,46.0 L582.0,36.7 L585.6,30.8 L589.2,32.6 L592.8,50.8 L596.4,56.3 L600.0,57.3 L600,90 L0,90 Z" fill="url(#g)"/><path d="M0.0,40.7 L3.6,39.3 L7.2,38.7 L10.8,34.5 L14.4,31.2 L18.0,28.0 L21.6,29.5 L25.1,17.5 L28.7,23.4 L32.3,25.5 L35.9,38.9 L39.5,60.5 L43.1,62.6 L46.7,45.2 L50.3,47.8 L53.9,47.6 L57.5,26.5 L61.1,33.5 L64.7,17.0 L68.3,8.4 L71.9,13.2 L75.4,14.8 L79.0,18.6 L82.6,28.6 L86.2,46.1 L89.8,28.5 L93.4,38.2 L97.0,38.1 L100.6,42.6 L104.2,29.3 L107.8,33.0 L111.4,25.9 L115.0,29.9 L118.6,34.3 L122.2,44.0 L125.7,60.4 L129.3,54.9 L132.9,53.8 L136.5,54.5 L140.1,33.4 L143.7,42.7 L147.3,21.6 L150.9,9.9 L154.5,14.1 L158.1,9.4 L161.7,24.8 L165.3,29.2 L168.9,31.0 L172.5,40.8 L176.0,38.5 L179.6,46.3 L183.2,28.7 L186.8,32.1 L190.4,29.1 L194.0,26.5 L197.6,30.7 L201.2,18.4 L204.8,30.1 L208.4,49.3 L212.0,55.8 L215.6,52.5 L219.2,54.7 L222.8,51.7 L226.3,57.6 L229.9,36.9 L233.5,28.6 L237.1,20.0 L240.7,12.3 L244.3,15.9 L247.9,30.3 L251.5,27.3 L255.1,28.4 L258.7,34.6 L262.3,33.1 L265.9,40.9 L269.5,39.2 L273.1,40.3 L276.6,40.7 L280.2,22.6 L283.8,24.2 L287.4,25.6 L291.0,24.7 L294.6,42.9 L298.2,46.7 L301.8,58.6 L305.4,48.2 L309.0,47.5 L312.6,56.3 L316.2,41.4 L319.8,25.8 L323.4,17.4 L326.9,6.0 L330.5,7.1 L334.1,23.5 L337.7,29.3 L341.3,31.1 L344.9,28.7 L348.5,33.1 L352.1,38.1 L355.7,39.3 L359.3,32.3 L362.9,29.1 L366.5,23.5 L370.1,28.7 L373.7,25.0 L377.2,30.7 L380.8,44.2 L384.4,45.6 L388.0,49.5 L391.6,56.0 L395.2,50.8 L398.8,54.1 L402.4,36.1 L406.0,16.6 L409.6,8.0 L413.2,21.1 L416.8,15.3 L420.4,19.2 L424.0,39.5 L427.5,31.4 L431.1,71.8 L434.7,65.1 L438.3,63.8 L441.9,64.9 L445.5,60.2 L449.1,65.7 L452.7,45.8 L456.3,48.1 L459.9,46.8 L463.5,48.7 L467.1,57.7 L470.7,74.0 L474.3,75.9 L477.8,70.2 L481.4,84.0 L485.0,72.7 L488.6,66.3 L492.2,50.8 L495.8,41.8 L499.4,35.8 L503.0,34.3 L506.6,49.2 L510.2,45.9 L513.8,57.0 L517.4,64.2 L521.0,64.8 L524.6,62.6 L528.1,64.4 L531.7,65.0 L535.3,56.8 L538.9,50.5 L542.5,45.0 L546.1,41.1 L549.7,55.6 L553.3,70.6 L556.9,75.2 L560.5,67.4 L564.1,68.5 L567.7,72.9 L571.3,62.1 L574.9,60.3 L578.4,46.0 L582.0,36.7 L585.6,30.8 L589.2,32.6 L592.8,50.8 L596.4,56.3 L600.0,57.3" fill="none" stroke="#2a78d6" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
-        </div>
-        <div class="datos">
-          <div class="ancho"><div class="et">Presentado por</div><div class="va">Valery Nickol Rosero Molina<br>Johan David Delgado</div></div>
-          <div><div class="et">Docente</div><div class="va">Cristian Ordoñez</div></div>
-          <div><div class="et">Fecha</div><div class="va">Octubre de 2026</div></div>
-          <div class="ancho"><div class="et">Repositorio del proyecto (GitHub)</div><div class="va"><a href="https://github.com/Valery-Rosero/Red-Neuronal-App">https://github.com/Valery-Rosero/Red-Neuronal-App</a></div></div>
-          <div class="ancho"><div class="et">Aplicación web</div><div class="va"><a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a></div></div>
-        </div>
-      </div>
-
-      <div class="indice">
-        <h2>Contenido</h2>
-        <ol><li><a href="#1-introducción">1. Introducción</a></li><li><a href="#2-descripción-del-problema-y-del-dataset">2. Descripción del problema y del dataset</a></li><li><a href="#3-calidad-de-los-datos-y-reglas-de-limpieza">3. Calidad de los datos y reglas de limpieza</a></li><li><a href="#4-análisis-exploratorio">4. Análisis exploratorio</a></li><li><a href="#5-metodología">5. Metodología</a></li><li><a href="#6-diseño-de-las-arquitecturas">6. Diseño de las arquitecturas</a></li><li><a href="#7-entrenamiento">7. Entrenamiento</a></li><li><a href="#8-resultados">8. Resultados</a></li><li><a href="#9-sobreajuste-y-generalización">9. Sobreajuste y generalización</a></li><li><a href="#10-experimentos-de-control">10. Experimentos de control</a></li><li><a href="#11-evidencia-adicional">11. Evidencia adicional</a></li><li><a href="#12-preguntas-de-análisis">12. Preguntas de análisis</a></li><li><a href="#13-despliegue">13. Despliegue</a></li><li><a href="#14-conclusiones">14. Conclusiones</a></li><li><a href="#referencias">Referencias</a></li></ol>
-      </div>
-
-      <section id="1-introducción"><h2>1. Introducción</h2>
-<p>La planeación de la operación de un sistema eléctrico depende de anticipar cuánta energía se va a consumir. Una predicción precisa de la demanda de la próxima hora permite programar la generación, reducir costos de reserva y evitar desbalances. La demanda tiene una estructura temporal fuerte: depende de lo que ocurrió en las horas anteriores, del ciclo diario y semanal y de variables externas como el clima, el precio de la energía o los días festivos.</p>
-<p>Este informe documenta el diseño, la implementación, la comparación y el despliegue de arquitecturas de redes neuronales recurrentes <strong>LSTM</strong> (<em>Long Short-Term Memory</em>) para predecir la demanda eléctrica de la <strong>hora siguiente</strong> a partir de una ventana de <em>n</em> horas consecutivas de información multivariada.</p>
-<h3>1.1 Objetivos</h3>
-<p><strong>Objetivo general.</strong> Diseñar, implementar, comparar y justificar arquitecturas LSTM para predecir la demanda eléctrica de la siguiente hora a partir de información histórica multivariada.</p>
-<p><strong>Objetivos específicos.</strong></p>
+        <div class="pagina resumen"><section class="resumen"><h2 id="resumen">Resumen</h2>
+<p>Este trabajo diseña, implementa, compara y despliega redes neuronales recurrentes de memoria a corto y largo plazo (LSTM) para predecir la demanda eléctrica de la hora siguiente a partir de información horaria multivariada (demanda, clima, precio y calendario) del periodo 2025-2026. Primero se auditó la calidad del conjunto de datos y se aplicaron reglas de limpieza que no inventan valores: los datos inválidos se marcaron como faltantes y se descartaron las ventanas que los contenían. La serie se dividió cronológicamente en entrenamiento, validación y prueba, y se normalizó solo con parámetros de entrenamiento. Se compararon tres arquitecturas (una LSTM base, una LSTM profunda y una CNN-LSTM) con ventanas de 12, 24 y 48 horas. El modelo seleccionado por validación, la LSTM base con ventana de 12 horas, obtuvo en un periodo nunca visto un MAE de 19,86 MW, un RMSE de 24,99 MW, un MAPE de 3,43 % y un R² de 0,904. Esto representa un 44 % menos de error que un pronóstico de persistencia y un 15 % menos que una regresión lineal. No se encontró sobreajuste relevante. Los experimentos de control mostraron que Dropout y la detención temprana fueron determinantes para generalizar, y que aumentar el número de neuronas no mejoró los resultados. Finalmente, el modelo se desplegó en una aplicación web que valida las entradas con las mismas reglas del entrenamiento.</p>
+<p class="palabras"><em>Palabras clave:</em> LSTM, predicción de demanda eléctrica, series de tiempo, redes neuronales recurrentes, aprendizaje profundo</p>
+</section></div><div class="pagina cuerpo"><section class="inicio"><h2 id="diseño-de-una-arquitectura-lstm-para-la-predicción-de-demanda-energética">Diseño de una arquitectura LSTM para la predicción de demanda energética</h2>
+<p>La operación de un sistema eléctrico depende de anticipar cuánta energía se va a consumir. Una predicción precisa de la demanda de la próxima hora permite programar la generación, reducir los costos de reserva y evitar desbalances. La demanda tiene una estructura temporal marcada: depende de lo ocurrido en las horas anteriores, de los ciclos diario y semanal, y de variables externas como el clima, el precio de la energía y los días festivos.</p>
+<p>Las redes neuronales recurrentes de memoria a corto y largo plazo (<em>Long Short-Term Memory</em>, LSTM) fueron propuestas para aprender dependencias temporales largas, que las redes recurrentes simples no logran capturar por el desvanecimiento del gradiente (Goodfellow et al., 2016; Hochreiter y Schmidhuber, 1997). Este informe documenta el diseño, la implementación, la comparación y el despliegue de arquitecturas LSTM para predecir la demanda eléctrica de la hora siguiente a partir de una ventana de <em>n</em> horas consecutivas de información multivariada.</p>
+<p>El desarrollo completo (código, cuaderno de Jupyter y modelos entrenados) está disponible en el repositorio del proyecto (<a href="https://github.com/Valery-Rosero/Red-Neuronal-App">https://github.com/Valery-Rosero/Red-Neuronal-App</a>), y el modelo desplegado puede usarse en la aplicación web (<a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a>). Todo se implementó en Python con TensorFlow y Keras (Chollet et al., 2015), pandas, NumPy y scikit-learn (Pedregosa et al., 2011). Las cifras, tablas y figuras de este informe provienen directamente de la ejecución del cuaderno.</p>
+<h3 id="objetivos">Objetivos</h3>
+<p>El objetivo general es diseñar, implementar, comparar y justificar arquitecturas LSTM para predecir la demanda eléctrica de la siguiente hora a partir de información histórica multivariada. Los objetivos específicos son:</p>
 <ol>
-<li>Auditar la calidad del dataset y definir reglas de limpieza justificadas que no inventen valores.</li>
+<li>Auditar la calidad del conjunto de datos y definir reglas de limpieza justificadas que no inventen valores.</li>
 <li>Preparar los datos sin fuga de información futura: orden cronológico, separación cronológica en entrenamiento, validación y prueba, y normalización con parámetros calculados solo sobre entrenamiento.</li>
 <li>Diseñar tres arquitecturas (LSTM base, LSTM profunda y una propuesta propia) y evaluarlas con ventanas de 12, 24 y 48 horas.</li>
-<li>Evaluar con MAE, MSE, RMSE, MAPE y R², y analizar el sobreajuste y la capacidad de generalización.</li>
-<li>Responder las preguntas de análisis con evidencia experimental.</li>
+<li>Evaluar los modelos con MAE, MSE, RMSE, MAPE y R², y analizar el sobreajuste y la capacidad de generalización.</li>
+<li>Responder las preguntas de análisis del taller con evidencia experimental.</li>
 <li>Desplegar el modelo seleccionado en una aplicación web.</li>
 </ol>
-<h3>1.2 Recursos del proyecto</h3>
-<div class="tabla-wrap"><table>
-<thead>
-<tr>
-  <th>Recurso</th>
-  <th>Ubicación</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>Repositorio (código, notebook, modelos)</td>
-  <td><a href="https://github.com/Valery-Rosero/Red-Neuronal-App">https://github.com/Valery-Rosero/Red-Neuronal-App</a></td>
-</tr>
-<tr>
-  <td>Aplicación web desplegada</td>
-  <td><a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a></td>
-</tr>
-<tr>
-  <td>Notebook con el desarrollo completo</td>
-  <td><code>Taller_LSTM.ipynb</code> (en el repositorio)</td>
-</tr>
-</tbody>
-</table></div>
-<p>Todo el desarrollo se realizó en Python con TensorFlow/Keras, pandas, NumPy, scikit-learn y Matplotlib. Las cifras, tablas y figuras de este informe salen directamente de la ejecución del notebook.</p>
-</section>
-<section id="2-descripción-del-problema-y-del-dataset" class="nueva-pagina"><h2>2. Descripción del problema y del dataset</h2>
-<p><strong>Problema.</strong> Dada una ventana de <em>n</em> horas consecutivas (con <em>n</em> ∈ {12, 24, 48}) que termina en la hora <em>t</em>, predecir la demanda de la hora <em>t + 1</em>.</p>
-<p><strong>Dataset.</strong> Archivo <code>dataset_demanda_energia_LSTM_2025_2026.csv</code>, con registros horarios del 1 de enero de 2025 al 31 de diciembre de 2026 (17 550 filas crudas, 15 columnas).</p>
-<div class="tabla-wrap"><table>
+</section><section class=""><h2 id="descripción-del-problema-y-del-conjunto-de-datos">Descripción del problema y del conjunto de datos</h2>
+<p>El problema consiste en predecir la demanda de la hora <em>t</em> + 1 a partir de una ventana de <em>n</em> horas consecutivas que termina en la hora <em>t</em>, con <em>n</em> ∈ {12, 24, 48}. El conjunto de datos (<code>dataset_demanda_energia_LSTM_2025_2026.csv</code>) contiene registros horarios del 1 de enero de 2025 al 31 de diciembre de 2026, con 17 550 filas y 15 columnas, que se describen en la Tabla 1.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 1</p><p class="t-tit">Variables del conjunto de datos</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
   <th>Variable</th>
@@ -203,75 +177,75 @@
 <tbody>
 <tr>
   <td><code>timestamp</code></td>
-  <td>fecha-hora</td>
+  <td>Fecha y hora</td>
   <td>Instante de la observación (resolución horaria)</td>
 </tr>
 <tr>
   <td><code>demanda_mw</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Demanda eléctrica observada en la hora <em>t</em> (MW)</td>
 </tr>
 <tr>
   <td><code>temperatura_c</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Temperatura (°C)</td>
 </tr>
 <tr>
   <td><code>humedad_pct</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Humedad relativa (%)</td>
 </tr>
 <tr>
   <td><code>viento_kmh</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Velocidad del viento (km/h)</td>
 </tr>
 <tr>
   <td><code>radiacion_wm2</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Radiación solar (W/m²)</td>
 </tr>
 <tr>
   <td><code>precipitacion_mm</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Precipitación (mm)</td>
 </tr>
 <tr>
   <td><code>precio_kwh</code></td>
-  <td>continua</td>
+  <td>Continua</td>
   <td>Precio de la energía</td>
 </tr>
 <tr>
   <td><code>hora</code>, <code>dia_semana</code>, <code>mes</code></td>
-  <td>calendario</td>
+  <td>Calendario</td>
   <td>Hora (0-23), día de la semana (0 = lunes) y mes (1-12)</td>
 </tr>
 <tr>
   <td><code>fin_semana</code>, <code>festivo</code></td>
-  <td>binaria</td>
-  <td>Indicadores de fin de semana y día festivo</td>
+  <td>Binaria</td>
+  <td>Indicadores de fin de semana y de día festivo</td>
 </tr>
 <tr>
   <td><code>periodo_dia</code></td>
-  <td>texto</td>
+  <td>Texto</td>
   <td>Madrugada, mañana, tarde o noche</td>
 </tr>
 <tr>
   <td><code>demanda_objetivo</code></td>
-  <td>objetivo</td>
-  <td>Demanda de la hora <em>t + 1</em> (lo que se predice)</td>
+  <td>Objetivo</td>
+  <td>Demanda de la hora <em>t</em> + 1 (variable a predecir)</td>
 </tr>
 </tbody>
-</table></div>
-<p>Se verificó que <code>demanda_objetivo</code> en la fila <em>t</em> coincide con <code>demanda_mw</code> en la fila <em>t + 1</em> en el <strong>99,8 %</strong> de las horas. Las diferencias aparecen solo donde <code>demanda_mw</code> tiene picos anómalos, lo que confirma que el objetivo es la demanda de la hora siguiente y que esos picos son errores de medición.</p>
-</section>
-<section id="3-calidad-de-los-datos-y-reglas-de-limpieza" class="nueva-pagina"><h2>3. Calidad de los datos y reglas de limpieza</h2>
-<h3>3.1 Problemas detectados</h3>
-<div class="tabla-wrap"><table>
+</table></div></div>
+<p>Se verificó que <code>demanda_objetivo</code> en la fila <em>t</em> coincide con <code>demanda_mw</code> en la fila <em>t</em> + 1 en el 99,8 % de las horas. Las diferencias aparecen solo donde <code>demanda_mw</code> presenta picos anómalos, lo que confirma que el objetivo es la demanda de la hora siguiente y que esos picos son errores de medición.</p>
+</section><section class=""><h2 id="calidad-de-los-datos-y-reglas-de-limpieza">Calidad de los datos y reglas de limpieza</h2>
+<h3 id="problemas-detectados">Problemas detectados</h3>
+<p>La auditoría inicial encontró los cinco tipos de problemas que anuncia el enunciado del taller (ver Tabla 2).</p>
+<div class="tabla-apa"><p class="t-num">Tabla 2</p><p class="t-tit">Problemas de calidad detectados en el conjunto de datos</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
   <th>Problema</th>
-  <th>Evidencia en el dataset</th>
+  <th>Evidencia</th>
 </tr>
 </thead>
 <tbody>
@@ -289,34 +263,34 @@
 </tr>
 <tr>
   <td>Inconsistencias de texto</td>
-  <td><code>periodo_dia</code> con 8 variantes: <code>TARDE</code>, <code>Mañana</code>, <code>noche</code>, etc.</td>
+  <td><code>periodo_dia</code> con 8 variantes, como <code>TARDE</code>, <code>Mañana</code> o <code>noche</code></td>
 </tr>
 <tr>
   <td>Anomalías</td>
-  <td>Humedad hasta 129,7 %, viento y precio negativos, temperaturas de −23,5 °C y 54,7 °C, picos de demanda de hasta 1 776 MW cuando el objetivo nunca supera 927 MW</td>
+  <td>Humedad de hasta 129,7 %, viento y precio negativos, temperaturas de −23,5 °C y 54,7 °C, y picos de demanda de hasta 1 776 MW, aunque el objetivo nunca supera 927 MW</td>
 </tr>
 </tbody>
-</table></div>
-<h3>3.2 Reglas de limpieza</h3>
-<p>El principio rector, exigido por el taller, es <strong>no inventar valores</strong>. Ningún dato se imputa, interpola ni &quot;corrige&quot;: lo inválido se marca como faltante (<code>NaN</code>) y se excluye toda ventana que lo contenga.</p>
-<div class="tabla-wrap"><table>
+</table></div></div>
+<h3 id="reglas-de-limpieza">Reglas de limpieza</h3>
+<p>El principio rector, exigido por el taller, es no inventar valores. Ningún dato se imputa, interpola ni corrige: lo inválido se marca como faltante (<code>NaN</code>) y se excluye toda ventana que lo contenga. La Tabla 3 resume las reglas aplicadas y su justificación.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 3</p><p class="t-tit">Reglas de limpieza aplicadas y su justificación</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
-  <th>#</th>
   <th>Regla</th>
+  <th>Descripción</th>
   <th>Justificación</th>
 </tr>
 </thead>
 <tbody>
 <tr>
   <td>R1</td>
-  <td>Normalizar el texto de <code>periodo_dia</code> (quitar espacios y pasar a minúsculas)</td>
-  <td>Son la misma categoría escrita distinto; se pasa de 8 a 4 valores</td>
+  <td>Normalizar el texto de <code>periodo_dia</code> (sin espacios y en minúsculas)</td>
+  <td>Son la misma categoría escrita de forma distinta; se pasa de 8 a 4 valores</td>
 </tr>
 <tr>
   <td>R2</td>
   <td>Eliminar los duplicados exactos</td>
-  <td>Repetir una observación la sobre-pondera y podría filtrar información entre conjuntos</td>
+  <td>Repetir una observación la sobrepondera y podría filtrar información entre conjuntos</td>
 </tr>
 <tr>
   <td>R3</td>
@@ -331,48 +305,46 @@
 <tr>
   <td>R5</td>
   <td>Valores fuera de rango físico → <code>NaN</code></td>
-  <td>Humedad ∈ [0, 100] %; viento, radiación, precipitación y precio ≥ 0; temperatura ∈ [−10, 45] °C. Fuera de esos límites son errores de sensor</td>
+  <td>Humedad entre 0 y 100 %; viento, radiación, precipitación y precio no negativos; temperatura entre −10 y 45 °C</td>
 </tr>
 <tr>
   <td>R6</td>
   <td><code>demanda_mw</code> fuera de [300, 1000] MW → <code>NaN</code></td>
-  <td>El objetivo, que está limpio, varía entre 314 y 927 MW; los picos de 1 100-1 776 MW no aparecen en él, así que son errores de medición</td>
+  <td>El objetivo, que está limpio, varía entre 314 y 927 MW; los picos de 1 100-1 776 MW no aparecen en él</td>
 </tr>
 <tr>
   <td>R7</td>
-  <td>Descartar las ventanas que contengan algún <code>NaN</code></td>
+  <td>Descartar las ventanas con algún <code>NaN</code></td>
   <td>Evita imputar, a costa de perder algunas ventanas</td>
 </tr>
 <tr>
   <td>R8</td>
-  <td>Descartar la última fila (sin objetivo)</td>
-  <td>El 31-12-2026 a las 23:00 no tiene &quot;hora siguiente&quot;</td>
+  <td>Descartar la última fila</td>
+  <td>El 31 de diciembre de 2026 a las 23:00 no tiene hora siguiente</td>
 </tr>
 </tbody>
-</table></div>
-<p>Con R5 y R6 se marcaron como inválidos 23 valores de demanda, 13 de temperatura, 9 de humedad, 14 de viento y 3 de precio. Ningún valor de radiación ni de precipitación quedó fuera de rango.</p>
-<figure><img src="informe/fig_01.png" alt="Demanda antes y después de la limpieza (izquierda) y cantidad de valores marcados como inválidos por variable (derecha)."><figcaption><strong>Figura 1.</strong> Demanda antes y después de la limpieza (izquierda) y cantidad de valores marcados como inválidos por variable (derecha).</figcaption></figure>
-</section>
-<section id="4-análisis-exploratorio"><h2>4. Análisis exploratorio</h2>
-<figure><img src="informe/fig_02.png" alt="Demanda media diaria y perfiles medios por hora del día, día de la semana y mes."><figcaption><strong>Figura 2.</strong> Demanda media diaria y perfiles medios por hora del día, día de la semana y mes.</figcaption></figure>
-<p>La demanda muestra un <strong>perfil diario muy marcado</strong>: mínimo en la madrugada y picos en la mañana y al final de la tarde. También <strong>baja los fines de semana</strong> y varía a lo largo del año.</p>
-<figure><img src="informe/fig_03.png" alt="Matriz de correlación entre las variables continuas, los indicadores de calendario y el objetivo."><figcaption><strong>Figura 3.</strong> Matriz de correlación entre las variables continuas, los indicadores de calendario y el objetivo.</figcaption></figure>
-<p>Las variables más correlacionadas con la demanda de la hora siguiente son la demanda actual (r = 0,88), la radiación (r = −0,50), el fin de semana (r = −0,49), la temperatura (r = 0,48) y el precio (r = 0,30). Viento y precipitación casi no se relacionan con la demanda (|r| &lt; 0,02).</p>
-<figure><img src="informe/fig_04.png" alt="Autocorrelación de la demanda para rezagos de 1 a 72 horas."><figcaption><strong>Figura 4.</strong> Autocorrelación de la demanda para rezagos de 1 a 72 horas.</figcaption></figure>
-<p>La autocorrelación confirma la dependencia temporal y el <strong>ciclo de 24 horas</strong>, lo que justifica usar ventanas de varias horas y modelos con memoria.</p>
-</section>
-<section id="5-metodología" class="nueva-pagina"><h2>5. Metodología</h2>
-<h3>5.1 Variables de entrada</h3>
-<p>Cada hora de la ventana se describe con <strong>15 variables</strong>:</p>
+</table></div></div>
+<p>Con las reglas R5 y R6 se marcaron como inválidos 23 valores de demanda, 13 de temperatura, 9 de humedad, 14 de viento y 3 de precio. Ningún valor de radiación ni de precipitación quedó fuera de rango. La Figura 1 muestra el efecto de la limpieza sobre la demanda.</p>
+<figure><p class="t-num">Figura 1</p><p class="t-tit">Efecto de la limpieza sobre la demanda y valores marcados como inválidos</p><img src="informe/fig_01.png" alt="Efecto de la limpieza sobre la demanda y valores marcados como inválidos"><p class="nota"><em>Nota.</em> A la izquierda, demanda antes (rojo) y después (azul) de la limpieza; a la derecha, número de valores marcados como inválidos por variable.</p></figure>
+</section><section class=""><h2 id="análisis-exploratorio">Análisis exploratorio</h2>
+<p>La demanda presenta un perfil diario muy marcado, con un mínimo en la madrugada y picos en la mañana y al final de la tarde. También disminuye los fines de semana y varía a lo largo del año (ver Figura 2).</p>
+<figure><p class="t-num">Figura 2</p><p class="t-tit">Demanda media diaria y perfiles medios por hora, día de la semana y mes</p><img src="informe/fig_02.png" alt="Demanda media diaria y perfiles medios por hora, día de la semana y mes"><p class="nota"><em>Nota.</em> En el panel del día de la semana, 0 corresponde al lunes.</p></figure>
+<p>Las variables más correlacionadas con la demanda de la hora siguiente son la demanda actual (<em>r</em> = 0,88), la radiación (<em>r</em> = −0,50), el fin de semana (<em>r</em> = −0,49), la temperatura (<em>r</em> = 0,48) y el precio (<em>r</em> = 0,30). El viento y la precipitación casi no se relacionan con la demanda (|<em>r</em>| &lt; 0,02), como se observa en la Figura 3.</p>
+<figure><p class="t-num">Figura 3</p><p class="t-tit">Matriz de correlación entre las variables continuas, los indicadores de calendario y el objetivo</p><img src="informe/fig_03.png" alt="Matriz de correlación entre las variables continuas, los indicadores de calendario y el objetivo"></figure>
+<p>La autocorrelación de la Figura 4 confirma la dependencia temporal y el ciclo de 24 horas, lo que justifica el uso de ventanas de varias horas y de modelos con memoria.</p>
+<figure><p class="t-num">Figura 4</p><p class="t-tit">Autocorrelación de la demanda para rezagos de 1 a 72 horas</p><img src="informe/fig_04.png" alt="Autocorrelación de la demanda para rezagos de 1 a 72 horas"><p class="nota"><em>Nota.</em> Las líneas rojas marcan los rezagos de 24 y 48 horas.</p></figure>
+</section><section class=""><h2 id="metodología">Metodología</h2>
+<h3 id="variables-de-entrada">Variables de entrada</h3>
+<p>Cada hora de la ventana se describe con 15 variables:</p>
 <ul>
-<li><strong>7 continuas:</strong> demanda, temperatura, humedad, viento, radiación, precipitación y precio. La demanda pasada es una entrada legítima porque se conoce en el instante <em>t</em>.</li>
-<li><strong>6 cíclicas:</strong> hora, día de la semana y mes, cada una codificada como seno y coseno. Así las 23:00 quedan &quot;cerca&quot; de las 00:00 y diciembre cerca de enero, algo que una codificación numérica directa no logra.</li>
-<li><strong>2 binarias:</strong> fin de semana y festivo.</li>
+<li>Siete continuas: demanda, temperatura, humedad, viento, radiación, precipitación y precio. La demanda pasada es una entrada legítima porque se conoce en el instante <em>t</em>.</li>
+<li>Seis cíclicas: la hora, el día de la semana y el mes, codificados como seno y coseno. Así, las 23:00 quedan cerca de las 00:00 y diciembre cerca de enero, algo que una codificación numérica directa no logra.</li>
+<li>Dos binarias: fin de semana y festivo.</li>
 </ul>
-<p><code>periodo_dia</code> se limpió pero se excluyó del modelo, porque es una función exacta de <code>hora</code> y no aporta información nueva. <code>demanda_objetivo</code> <strong>nunca</strong> se usa como entrada.</p>
-<h3>5.2 Separación cronológica y normalización</h3>
-<p>Los datos se dividieron <strong>por orden temporal</strong> en proporción 70 / 15 / 15, sin <code>train_test_split</code> aleatorio:</p>
-<div class="tabla-wrap"><table>
+<p>La variable <code>periodo_dia</code> se limpió pero se excluyó del modelo, porque es una función exacta de <code>hora</code> y no aporta información nueva. La variable <code>demanda_objetivo</code> nunca se usa como entrada.</p>
+<h3 id="separación-cronológica-y-normalización">Separación cronológica y normalización</h3>
+<p>En las series de tiempo, la evaluación debe respetar el orden temporal: el modelo se entrena con el pasado y se evalúa con el futuro (Hyndman y Athanasopoulos, 2021). Por eso los datos se dividieron por orden temporal en proporción 70/15/15, sin <code>train_test_split</code> aleatorio (ver Tabla 4).</p>
+<div class="tabla-apa"><p class="t-num">Tabla 4</p><p class="t-tit">Separación cronológica del conjunto de datos</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
   <th>Conjunto</th>
@@ -384,41 +356,42 @@
 <tbody>
 <tr>
   <td>Entrenamiento</td>
-  <td>01-01-2025 00:00 → 26-05-2026 23:00</td>
+  <td>01-01-2025 00:00 a 26-05-2026 23:00</td>
   <td>12 264</td>
   <td>Ajustar los pesos</td>
 </tr>
 <tr>
   <td>Validación</td>
-  <td>27-05-2026 00:00 → 13-09-2026 11:00</td>
+  <td>27-05-2026 00:00 a 13-09-2026 11:00</td>
   <td>2 628</td>
-  <td>Early Stopping y selección del modelo</td>
+  <td>Detención temprana y selección del modelo</td>
 </tr>
 <tr>
   <td>Prueba</td>
-  <td>13-09-2026 12:00 → 31-12-2026 23:00</td>
+  <td>13-09-2026 12:00 a 31-12-2026 23:00</td>
   <td>2 628</td>
-  <td>Evaluación final; no se usa para ninguna decisión</td>
+  <td>Evaluación final, sin uso en ninguna decisión</td>
 </tr>
 </tbody>
-</table></div>
-<p>La normalización z-score (media 0, desviación 1) usa la media y la desviación estándar calculadas <strong>únicamente sobre el conjunto de entrenamiento</strong>, y esos mismos parámetros se aplican a validación, prueba y a la aplicación web.</p>
-<h3>5.3 Construcción de las ventanas</h3>
-<p>Para cada hora <em>t</em>, la entrada es la matriz de las horas [<em>t − n + 1</em>, …, <em>t</em>] (<em>n</em> × 15) y el objetivo es la demanda de <em>t + 1</em>. Cada ventana se asigna al conjunto que corresponde a su hora <em>t</em>, de modo que ningún objetivo de validación o prueba se ve durante el entrenamiento. El notebook incluye comprobaciones automáticas (<code>assert</code>) de que no existe fuga temporal.</p>
-<p class="tabla-cap"><strong>Tabla 1.</strong> Ventanas disponibles por conjunto después de descartar las que contienen valores inválidos.</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Ventana</th><th class="n">Entrenamiento</th><th class="n">Validación</th><th class="n">Prueba</th></tr></thead><tbody><tr><td class="">12 h</td><td class="n">9 686</td><td class="n">2 051</td><td class="n">2 093</td></tr><tr><td class="">24 h</td><td class="n">7 526</td><td class="n">1 605</td><td class="n">1 664</td></tr><tr><td class="">48 h</td><td class="n">4 504</td><td class="n">964</td><td class="n">1 042</td></tr><tr><td class="">Conjunto común (válidas para 48 h)</td><td class="n">4 504</td><td class="n">964</td><td class="n">1 042</td></tr></tbody></table></div>
-<p>Cada valor inválido elimina las <em>n</em> ventanas que lo contienen, por eso la ventana de 48 h conserva menos muestras. Para comparar las ventanas de forma justa, la evaluación principal usa un <strong>conjunto común de prueba</strong>: los 1 042 instantes válidos para la ventana de 48 h, que también son válidos para 12 y 24 h.</p>
-<h3>5.4 Cumplimiento de las condiciones del taller</h3>
-<div class="tabla-wrap"><table>
+</table></div></div>
+<p>La normalización <em>z</em> (media 0 y desviación estándar 1) usa la media y la desviación estándar calculadas únicamente sobre el conjunto de entrenamiento. Esos mismos parámetros se aplican a validación, a prueba y a la aplicación web.</p>
+<h3 id="construcción-de-las-ventanas">Construcción de las ventanas</h3>
+<p>Para cada hora <em>t</em>, la entrada es la matriz de las horas [<em>t</em> − <em>n</em> + 1, …, <em>t</em>] (<em>n</em> × 15) y el objetivo es la demanda de <em>t</em> + 1. Cada ventana se asigna al conjunto que corresponde a su hora <em>t</em>, de modo que ningún objetivo de validación o prueba se observa durante el entrenamiento. El cuaderno incluye verificaciones automáticas de que no existe fuga temporal.</p>
+<p>Cada valor inválido elimina las <em>n</em> ventanas que lo contienen, por lo que la ventana de 48 horas conserva menos muestras (ver Tabla 5). Para comparar las ventanas de forma justa, la evaluación principal usa un conjunto común de prueba: los 1 042 instantes válidos para la ventana de 48 horas.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 5</p><p class="t-tit">Ventanas disponibles por conjunto tras descartar las que contienen valores inválidos</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Ventana</th><th class="n">Entrenamiento</th><th class="n">Validación</th><th class="n">Prueba</th></tr></thead><tbody><tr><td class="">12 h</td><td class="n">9 686</td><td class="n">2 051</td><td class="n">2 093</td></tr><tr><td class="">24 h</td><td class="n">7 526</td><td class="n">1 605</td><td class="n">1 664</td></tr><tr><td class="">48 h</td><td class="n">4 504</td><td class="n">964</td><td class="n">1 042</td></tr><tr><td class="">Conjunto común</td><td class="n">4 504</td><td class="n">964</td><td class="n">1 042</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> El conjunto común está formado por los instantes válidos para la ventana de 48 horas, que también son válidos para las de 12 y 24 horas.</p></div>
+<h3 id="cumplimiento-de-las-condiciones-del-taller">Cumplimiento de las condiciones del taller</h3>
+<p>La Tabla 6 relaciona cada condición del enunciado con la forma en que se cumplió.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 6</p><p class="t-tit">Cumplimiento de las condiciones del taller</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
-  <th>Condición del taller</th>
+  <th>Condición</th>
   <th>Cómo se cumplió</th>
 </tr>
 </thead>
 <tbody>
 <tr>
   <td>No utilizar información futura como entrada</td>
-  <td>La entrada solo contiene las horas [<em>t − n + 1</em>, …, <em>t</em>]; el objetivo (<em>t + 1</em>) se excluye; hay verificaciones automáticas</td>
+  <td>La entrada solo contiene las horas [<em>t</em> − <em>n</em> + 1, …, <em>t</em>]; el objetivo (<em>t</em> + 1) se excluye y hay verificaciones automáticas</td>
 </tr>
 <tr>
   <td>Ordenar cronológicamente antes de crear secuencias</td>
@@ -426,7 +399,7 @@
 </tr>
 <tr>
   <td>Separar entrenamiento, validación y prueba cronológicamente</td>
-  <td>Cortes por fecha 70/15/15 (sección 5.2)</td>
+  <td>Cortes por fecha en proporción 70/15/15</td>
 </tr>
 <tr>
   <td>No utilizar <code>train_test_split</code> aleatorio</td>
@@ -434,49 +407,48 @@
 </tr>
 <tr>
   <td>Justificar las reglas de limpieza</td>
-  <td>Reglas R1-R8 con su justificación (sección 3.2)</td>
+  <td>Reglas R1 a R8, cada una con su justificación</td>
 </tr>
 <tr>
   <td>No inventar valores para corregir anomalías</td>
-  <td>Lo inválido pasa a <code>NaN</code> y se descarta la ventana; la app web aplica la misma regla</td>
+  <td>Lo inválido pasa a <code>NaN</code> y se descarta la ventana; la aplicación web aplica la misma regla</td>
 </tr>
 <tr>
   <td>Normalizar solo con parámetros de entrenamiento</td>
-  <td>Media y desviación calculadas sobre entrenamiento (sección 5.2)</td>
+  <td>Media y desviación estándar calculadas sobre entrenamiento</td>
 </tr>
 <tr>
   <td>Comparar mínimo tres arquitecturas LSTM</td>
-  <td>A (LSTM base), B (LSTM profunda) y C (CNN-LSTM)</td>
+  <td>LSTM base, LSTM profunda y CNN-LSTM</td>
 </tr>
 <tr>
-  <td>Experimentar con ventanas de 12, 24 y 48 h</td>
-  <td>3 arquitecturas × 3 ventanas = 9 modelos</td>
+  <td>Experimentar con ventanas de 12, 24 y 48 horas</td>
+  <td>Tres arquitecturas por tres ventanas: nueve modelos</td>
 </tr>
 <tr>
   <td>Evaluar con MAE, MSE, RMSE y R²</td>
-  <td>Se reportan además MAPE y épocas (sección 8)</td>
+  <td>Se reportan además el MAPE y las épocas</td>
 </tr>
 <tr>
-  <td>Analizar sobreajuste y generalización</td>
-  <td>Sección 9 y experimentos de control (sección 10)</td>
+  <td>Analizar el sobreajuste y la generalización</td>
+  <td>Apartados de sobreajuste y de experimentos de control</td>
 </tr>
 <tr>
-  <td>Gráficas: loss, real vs. predicha, error y comparación</td>
-  <td>Figuras de las secciones 7 y 8</td>
+  <td>Gráficas de pérdida, real frente a predicha, error y comparación</td>
+  <td>Figuras de los apartados de entrenamiento y resultados</td>
 </tr>
 <tr>
-  <td>Desplegar el modelo en una app web</td>
-  <td><a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a> (sección 13)</td>
+  <td>Desplegar el modelo en una aplicación web</td>
+  <td>Aplicación pública en Vercel (ver el apartado de despliegue)</td>
 </tr>
 </tbody>
-</table></div>
-</section>
-<section id="6-diseño-de-las-arquitecturas" class="nueva-pagina"><h2>6. Diseño de las arquitecturas</h2>
-<div class="tabla-wrap"><table>
+</table></div></div>
+</section><section class=""><h2 id="diseño-de-las-arquitecturas">Diseño de las arquitecturas</h2>
+<p>Se diseñaron tres alternativas, descritas en la Tabla 7. El número de parámetros de una LSTM no depende de la longitud de la ventana.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 7</p><p class="t-tit">Arquitecturas evaluadas</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
-  <th></th>
-  <th>Arquitectura</th>
+  <th>Modelo</th>
   <th>Capas</th>
   <th>Parámetros</th>
   <th>Justificación</th>
@@ -484,244 +456,236 @@
 </thead>
 <tbody>
 <tr>
-  <td><strong>A</strong></td>
-  <td>LSTM base</td>
+  <td>A. LSTM base</td>
   <td><code>LSTM(32)</code> → <code>Dense(1)</code></td>
   <td>6 177</td>
   <td>Línea de referencia: la red recurrente más simple. Si un modelo más complejo no la supera, su complejidad no se justifica</td>
 </tr>
 <tr>
-  <td><strong>B</strong></td>
-  <td>LSTM profunda</td>
+  <td>B. LSTM profunda</td>
   <td><code>LSTM(64)</code> → <code>Dropout(0,2)</code> → <code>LSTM(32)</code> → <code>Dropout(0,2)</code> → <code>Dense(16, ReLU)</code> → <code>Dense(1)</code></td>
   <td>33 441</td>
-  <td>Dos capas apiladas aprenden representaciones jerárquicas: patrones horarios en la primera y tendencias más lentas en la segunda. El Dropout controla el sobreajuste que trae la mayor capacidad</td>
+  <td>Las capas apiladas aprenden representaciones jerárquicas, y el Dropout controla el sobreajuste que trae la mayor capacidad</td>
 </tr>
 <tr>
-  <td><strong>C</strong></td>
-  <td>CNN-LSTM (propuesta del grupo)</td>
+  <td>C. CNN-LSTM (propuesta)</td>
   <td><code>Conv1D(32, k = 3, causal)</code> → <code>LSTM(48)</code> → <code>Dropout(0,2)</code> → <code>Dense(16, ReLU)</code> → <code>Dense(1)</code></td>
   <td>17 825</td>
-  <td>La convolución detecta patrones locales (rampas de pocas horas, cambios de radiación o temperatura) y filtra ruido antes de la LSTM, que modela la dependencia larga. Es <strong>causal</strong>: cada paso solo ve horas anteriores</td>
+  <td>La convolución causal detecta patrones locales y filtra ruido antes de la LSTM, que modela la dependencia larga; cada paso solo ve horas anteriores</td>
 </tr>
 </tbody>
-</table></div>
-<p>Los parámetros corresponden a la ventana de 24 h; en una LSTM el número de parámetros no depende de la longitud de la ventana.</p>
-<p><strong>Configuración común de entrenamiento</strong>, idéntica para todos los modelos para que la comparación sea justa:</p>
+</table></div><p class="nota"><em>Nota.</em> Los parámetros corresponden a una entrada de 15 variables por hora.</p></div>
+<p>Para que la comparación fuera justa, todos los modelos se entrenaron con la misma configuración:</p>
 <ul>
-<li>Pérdida: error cuadrático medio (MSE). Optimizador: Adam con tasa de aprendizaje inicial de 0,001.</li>
-<li>Tamaño de lote: 64. Máximo de épocas: 80.</li>
-<li><strong>Early Stopping</strong> sobre la pérdida de validación, con paciencia de 10 épocas y restauración de los mejores pesos.</li>
-<li><strong>ReduceLROnPlateau</strong>: reduce la tasa de aprendizaje a la mitad si la validación no mejora en 4 épocas.</li>
-<li>Semilla aleatoria fija (42) para que los resultados sean reproducibles.</li>
+<li>Pérdida de error cuadrático medio (MSE) y optimizador Adam (Kingma y Ba, 2015) con una tasa de aprendizaje inicial de 0,001.</li>
+<li>Lotes de 64 ejemplos y un máximo de 80 épocas.</li>
+<li>Detención temprana (<em>early stopping</em>) sobre la pérdida de validación, con una paciencia de 10 épocas y restauración de los mejores pesos (Prechelt, 1998).</li>
+<li>Reducción de la tasa de aprendizaje a la mitad si la validación no mejora en 4 épocas.</li>
+<li>Semilla aleatoria fija (42), para que los resultados sean reproducibles.</li>
 </ul>
-</section>
-<section id="7-entrenamiento" class="nueva-pagina"><h2>7. Entrenamiento</h2>
-<figure><img src="informe/fig_05.png" alt="Curvas de pérdida (MSE normalizado, escala logarítmica) de entrenamiento y validación de los 9 modelos. La línea punteada marca la época con mejor validación."><figcaption><strong>Figura 5.</strong> Curvas de pérdida (MSE normalizado, escala logarítmica) de entrenamiento y validación de los 9 modelos. La línea punteada marca la época con mejor validación.</figcaption></figure>
-<p class="tabla-cap"><strong>Tabla 2.</strong> Épocas de entrenamiento de cada modelo. Early Stopping detiene el entrenamiento 10 épocas después de la mejor y restaura los pesos de esa época.</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="">Ventana</th><th class="n">Épocas ejecutadas</th><th class="n">Mejor época</th><th class="n">MSE validación*</th><th class="n">Tiempo (s)</th></tr></thead><tbody><tr><td class="">A · LSTM base</td><td class="">12 h</td><td class="n">60</td><td class="n">50</td><td class="n">0,0689</td><td class="n">50</td></tr><tr><td class="">A · LSTM base</td><td class="">24 h</td><td class="n">45</td><td class="n">35</td><td class="n">0,0725</td><td class="n">45</td></tr><tr><td class="">A · LSTM base</td><td class="">48 h</td><td class="n">55</td><td class="n">45</td><td class="n">0,0737</td><td class="n">59</td></tr><tr><td class="">B · LSTM profunda</td><td class="">12 h</td><td class="n">54</td><td class="n">44</td><td class="n">0,0695</td><td class="n">106</td></tr><tr><td class="">B · LSTM profunda</td><td class="">24 h</td><td class="n">42</td><td class="n">32</td><td class="n">0,0740</td><td class="n">99</td></tr><tr><td class="">B · LSTM profunda</td><td class="">48 h</td><td class="n">55</td><td class="n">45</td><td class="n">0,0765</td><td class="n">137</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">12 h</td><td class="n">56</td><td class="n">46</td><td class="n">0,0710</td><td class="n">65</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">24 h</td><td class="n">66</td><td class="n">56</td><td class="n">0,0743</td><td class="n">90</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">48 h</td><td class="n">51</td><td class="n">41</td><td class="n">0,0759</td><td class="n">72</td></tr></tbody></table></div><p class="tabla-cap" style="margin-top:4px">* MSE sobre datos normalizados en la mejor época. Tiempo en CPU.</p>
-<p>Todos los modelos convergen en 42-66 épocas, sin llegar al máximo de 80. La arquitectura A, que no tiene Dropout, es la única donde la pérdida de entrenamiento sigue bajando mientras la de validación se estabiliza: es un sobreajuste leve. En B y C la pérdida de validación queda igual o por debajo de la de entrenamiento. No es un error: el Dropout solo está activo al calcular la pérdida de entrenamiento y se desactiva al validar.</p>
-</section>
-<section id="8-resultados" class="nueva-pagina"><h2>8. Resultados</h2>
-<h3>8.1 Métricas</h3>
+</section><section class=""><h2 id="entrenamiento">Entrenamiento</h2>
+<p>La Figura 5 muestra las curvas de pérdida de los nueve modelos y la Tabla 8, las épocas de entrenamiento de cada uno.</p>
+<figure><p class="t-num">Figura 5</p><p class="t-tit">Curvas de pérdida de entrenamiento y validación de los nueve modelos</p><img src="informe/fig_05.png" alt="Curvas de pérdida de entrenamiento y validación de los nueve modelos"><p class="nota"><em>Nota.</em> Pérdida MSE sobre datos normalizados, en escala logarítmica. La línea punteada marca la época con la mejor validación.</p></figure>
+<div class="tabla-apa"><p class="t-num">Tabla 8</p><p class="t-tit">Épocas de entrenamiento de cada modelo</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="">Ventana</th><th class="n">Épocas ejecutadas</th><th class="n">Mejor época</th><th class="n">MSE de validación</th><th class="n">Tiempo (s)</th></tr></thead><tbody><tr><td class="">A. LSTM base</td><td class="">12 h</td><td class="n">60</td><td class="n">50</td><td class="n">0,0689</td><td class="n">50</td></tr><tr><td class="">A. LSTM base</td><td class="">24 h</td><td class="n">45</td><td class="n">35</td><td class="n">0,0725</td><td class="n">45</td></tr><tr><td class="">A. LSTM base</td><td class="">48 h</td><td class="n">55</td><td class="n">45</td><td class="n">0,0737</td><td class="n">59</td></tr><tr><td class="">B. LSTM profunda</td><td class="">12 h</td><td class="n">54</td><td class="n">44</td><td class="n">0,0695</td><td class="n">106</td></tr><tr><td class="">B. LSTM profunda</td><td class="">24 h</td><td class="n">42</td><td class="n">32</td><td class="n">0,0740</td><td class="n">99</td></tr><tr><td class="">B. LSTM profunda</td><td class="">48 h</td><td class="n">55</td><td class="n">45</td><td class="n">0,0765</td><td class="n">137</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">12 h</td><td class="n">56</td><td class="n">46</td><td class="n">0,0710</td><td class="n">65</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">24 h</td><td class="n">66</td><td class="n">56</td><td class="n">0,0743</td><td class="n">90</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">48 h</td><td class="n">51</td><td class="n">41</td><td class="n">0,0759</td><td class="n">72</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> La detención temprana detiene el entrenamiento 10 épocas después de la mejor y restaura los pesos de esa época. El MSE de validación se calcula sobre datos normalizados en la mejor época; el tiempo corresponde a una CPU.</p></div>
+<p>Todos los modelos convergieron entre 42 y 66 épocas, sin llegar al máximo de 80. La arquitectura A, que no tiene Dropout, es la única en la que la pérdida de entrenamiento sigue bajando mientras la de validación se estabiliza, lo que indica un sobreajuste leve. En B y C la pérdida de validación queda igual o por debajo de la de entrenamiento. No es un error: el Dropout solo está activo al calcular la pérdida de entrenamiento y se desactiva al validar (Srivastava et al., 2014).</p>
+</section><section class=""><h2 id="resultados">Resultados</h2>
+<h3 id="métricas">Métricas</h3>
+<p>Se usaron cinco métricas:</p>
 <ul>
-<li><strong>MAE</strong>: media del valor absoluto de (real − predicho). Es el error típico en MW.</li>
-<li><strong>MSE</strong>: media de (real − predicho)². Penaliza más los errores grandes.</li>
-<li><strong>RMSE</strong>: raíz cuadrada del MSE, expresada en MW.</li>
-<li><strong>MAPE</strong>: error absoluto relativo medio, en porcentaje.</li>
-<li><strong>R²</strong>: fracción de la variabilidad de la demanda que explica el modelo (1 = perfecto).</li>
+<li>El error absoluto medio (MAE), que es el error típico en MW.</li>
+<li>El error cuadrático medio (MSE), que penaliza más los errores grandes.</li>
+<li>Su raíz cuadrada (RMSE), expresada en MW.</li>
+<li>El error porcentual absoluto medio (MAPE).</li>
+<li>El coeficiente de determinación (R²), que indica la fracción de la variabilidad de la demanda que explica el modelo.</li>
 </ul>
-<h3>8.2 Tabla de resultados</h3>
-<p class="tabla-cap"><strong>Tabla 3.</strong> Resultados sobre el conjunto común de prueba (1 042 instantes entre el 26-09-2026 y el 31-12-2026), en MW. La persistencia (predecir que la próxima hora será igual a la actual) se incluye como referencia.</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="">Ventana</th><th class="n">MAE</th><th class="n">MSE</th><th class="n">RMSE</th><th class="n">MAPE</th><th class="n">R²</th><th class="n">Épocas</th></tr></thead><tbody><tr class="destacado"><td class="">A · LSTM base ✓</td><td class="">12 h</td><td class="n">19,86</td><td class="n">624,6</td><td class="n">24,99</td><td class="n">3,43 %</td><td class="n">0,9037</td><td class="n">60</td></tr><tr><td class="">A · LSTM base</td><td class="">24 h</td><td class="n">20,12</td><td class="n">652,6</td><td class="n">25,55</td><td class="n">3,47 %</td><td class="n">0,8994</td><td class="n">45</td></tr><tr><td class="">A · LSTM base</td><td class="">48 h</td><td class="n">21,06</td><td class="n">718,4</td><td class="n">26,80</td><td class="n">3,63 %</td><td class="n">0,8893</td><td class="n">55</td></tr><tr><td class="">B · LSTM profunda</td><td class="">12 h</td><td class="n">19,43</td><td class="n">613,5</td><td class="n">24,77</td><td class="n">3,37 %</td><td class="n">0,9054</td><td class="n">54</td></tr><tr><td class="">B · LSTM profunda</td><td class="">24 h</td><td class="n">20,05</td><td class="n">659,7</td><td class="n">25,69</td><td class="n">3,47 %</td><td class="n">0,8983</td><td class="n">42</td></tr><tr><td class="">B · LSTM profunda</td><td class="">48 h</td><td class="n">20,68</td><td class="n">681,4</td><td class="n">26,10</td><td class="n">3,58 %</td><td class="n">0,8950</td><td class="n">55</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">12 h</td><td class="n">19,75</td><td class="n">641,8</td><td class="n">25,33</td><td class="n">3,42 %</td><td class="n">0,9011</td><td class="n">56</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">24 h</td><td class="n">19,86</td><td class="n">650,8</td><td class="n">25,51</td><td class="n">3,43 %</td><td class="n">0,8997</td><td class="n">66</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">48 h</td><td class="n">21,28</td><td class="n">744,6</td><td class="n">27,29</td><td class="n">3,68 %</td><td class="n">0,8852</td><td class="n">51</td></tr><tr class="referencia"><td class="">Persistencia (referencia)</td><td class="">–</td><td class="n">35,50</td><td class="n">1 963,3</td><td class="n">44,31</td><td class="n">6,07 %</td><td class="n">0,6974</td><td class="n">–</td></tr></tbody></table></div><p class="tabla-cap" style="margin-top:4px">✓ Modelo seleccionado por validación. MAE, MSE y RMSE en MW (MSE en MW²).</p>
+<p>Como referencia se usó el pronóstico de persistencia, que supone que la próxima hora será igual a la actual (Hyndman y Athanasopoulos, 2021).</p>
+<h3 id="tabla-de-resultados">Tabla de resultados</h3>
+<p>La Tabla 9 presenta las métricas de los nueve modelos sobre el conjunto común de prueba.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 9</p><p class="t-tit">Resultados sobre el conjunto común de prueba</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="">Ventana</th><th class="n">MAE</th><th class="n">MSE</th><th class="n">RMSE</th><th class="n">MAPE</th><th class="n">R²</th><th class="n">Épocas</th></tr></thead><tbody><tr><td class="">A. LSTM base ✓</td><td class="">12 h</td><td class="n">19,86</td><td class="n">624,6</td><td class="n">24,99</td><td class="n">3,43 %</td><td class="n">0,9037</td><td class="n">60</td></tr><tr><td class="">A. LSTM base</td><td class="">24 h</td><td class="n">20,12</td><td class="n">652,6</td><td class="n">25,55</td><td class="n">3,47 %</td><td class="n">0,8994</td><td class="n">45</td></tr><tr><td class="">A. LSTM base</td><td class="">48 h</td><td class="n">21,06</td><td class="n">718,4</td><td class="n">26,80</td><td class="n">3,63 %</td><td class="n">0,8893</td><td class="n">55</td></tr><tr><td class="">B. LSTM profunda</td><td class="">12 h</td><td class="n">19,43</td><td class="n">613,5</td><td class="n">24,77</td><td class="n">3,37 %</td><td class="n">0,9054</td><td class="n">54</td></tr><tr><td class="">B. LSTM profunda</td><td class="">24 h</td><td class="n">20,05</td><td class="n">659,7</td><td class="n">25,69</td><td class="n">3,47 %</td><td class="n">0,8983</td><td class="n">42</td></tr><tr><td class="">B. LSTM profunda</td><td class="">48 h</td><td class="n">20,68</td><td class="n">681,4</td><td class="n">26,10</td><td class="n">3,58 %</td><td class="n">0,8950</td><td class="n">55</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">12 h</td><td class="n">19,75</td><td class="n">641,8</td><td class="n">25,33</td><td class="n">3,42 %</td><td class="n">0,9011</td><td class="n">56</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">24 h</td><td class="n">19,86</td><td class="n">650,8</td><td class="n">25,51</td><td class="n">3,43 %</td><td class="n">0,8997</td><td class="n">66</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">48 h</td><td class="n">21,28</td><td class="n">744,6</td><td class="n">27,29</td><td class="n">3,68 %</td><td class="n">0,8852</td><td class="n">51</td></tr><tr><td class="">Persistencia</td><td class="">–</td><td class="n">35,50</td><td class="n">1 963,3</td><td class="n">44,31</td><td class="n">6,07 %</td><td class="n">0,6974</td><td class="n">–</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> 1 042 instantes entre el 26 de septiembre y el 31 de diciembre de 2026. MAE y RMSE en MW; MSE en MW². ✓ = modelo seleccionado por validación.</p></div>
+<p>Los nueve modelos superan ampliamente a la persistencia: obtienen un RMSE de 24,8 a 27,3 MW frente a 44,3 MW, es decir, entre un 38 y un 44 % menos de error, y un R² de 0,89 a 0,91 frente a 0,70. La ventana de 12 horas es la mejor en las tres arquitecturas y la de 48 horas, la peor. Las diferencias entre arquitecturas son pequeñas (como máximo 0,6 MW de RMSE con la misma ventana), menores que el efecto de cambiar la ventana (ver Figura 6).</p>
+<figure><p class="t-num">Figura 6</p><p class="t-tit">Comparación de RMSE, MAPE y R² de los nueve modelos en el conjunto común de prueba</p><img src="informe/fig_06.png" alt="Comparación de RMSE, MAPE y R² de los nueve modelos en el conjunto común de prueba"><p class="nota"><em>Nota.</em> La línea discontinua corresponde al pronóstico de persistencia.</p></figure>
+<h3 id="selección-del-modelo">Selección del modelo</h3>
+<p>El modelo final se eligió con el RMSE de validación, también calculado sobre instantes comunes, y no con el de prueba. Elegir mirando el conjunto de prueba lo convertiría en otro conjunto de ajuste y la estimación del error dejaría de ser honesta. El modelo seleccionado es la LSTM base (A) con ventana de 12 horas, que tuvo el menor RMSE de validación de los nueve (25,26 MW). En prueba obtiene un MAE de 19,86 MW, un RMSE de 24,99 MW, un MAPE de 3,43 % y un R² de 0,904.</p>
+<h3 id="demanda-real-frente-a-predicha">Demanda real frente a predicha</h3>
+<p>Las Figuras 7 y 8 comparan la demanda real con la predicha. El modelo sigue con precisión el ciclo diario, incluidas las subidas de la mañana y de la tarde y los valles nocturnos, y las tres arquitecturas producen curvas casi superpuestas.</p>
+<figure><p class="t-num">Figura 7</p><p class="t-tit">Demanda real y predicha por el modelo seleccionado en el periodo de prueba</p><img src="informe/fig_07.png" alt="Demanda real y predicha por el modelo seleccionado en el periodo de prueba"><p class="nota"><em>Nota.</em> Arriba, el periodo completo (los huecos corresponden a ventanas descartadas por datos inválidos); abajo, una semana continua y el diagrama de dispersión entre valores reales y predichos.</p></figure>
+<figure><p class="t-num">Figura 8</p><p class="t-tit">Demanda real y predicciones de las tres arquitecturas durante la misma semana</p><img src="informe/fig_08.png" alt="Demanda real y predicciones de las tres arquitecturas durante la misma semana"><p class="nota"><em>Nota.</em> Ventana de 12 horas.</p></figure>
+<h3 id="error-de-predicción">Error de predicción</h3>
+<p>El error está centrado en cero, con un sesgo medio de −0,7 MW, es decir, el modelo no sobrestima ni subestima de forma sistemática. Su distribución es aproximadamente simétrica: el 68,9 % de las horas tiene un error absoluto menor de 25 MW y el percentil 95 es de 49 MW. No hay una franja horaria con errores sistemáticamente mayores (ver Figura 9).</p>
+<figure><p class="t-num">Figura 9</p><p class="t-tit">Error de predicción del modelo seleccionado</p><img src="informe/fig_09.png" alt="Error de predicción del modelo seleccionado"><p class="nota"><em>Nota.</em> De izquierda a derecha: error en el tiempo, distribución del error y error absoluto medio según la hora que se predice.</p></figure>
+</section><section class=""><h2 id="sobreajuste-y-generalización">Sobreajuste y generalización</h2>
+<p>La Tabla 10 y la Figura 10 comparan el error de cada modelo en entrenamiento, validación y prueba.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 10</p><p class="t-tit">RMSE de cada modelo en entrenamiento, validación y prueba</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="">Ventana</th><th class="n">Entrenamiento</th><th class="n">Validación</th><th class="n">Prueba</th><th class="n">Prueba / entrenamiento</th></tr></thead><tbody><tr><td class="">A. LSTM base</td><td class="">12 h</td><td class="n">23,32</td><td class="n">25,43</td><td class="n">25,01</td><td class="n">1,07</td></tr><tr><td class="">A. LSTM base</td><td class="">24 h</td><td class="n">24,08</td><td class="n">26,08</td><td class="n">25,71</td><td class="n">1,07</td></tr><tr><td class="">A. LSTM base</td><td class="">48 h</td><td class="n">23,96</td><td class="n">26,31</td><td class="n">26,80</td><td class="n">1,12</td></tr><tr><td class="">B. LSTM profunda</td><td class="">12 h</td><td class="n">23,95</td><td class="n">25,53</td><td class="n">24,74</td><td class="n">1,03</td></tr><tr><td class="">B. LSTM profunda</td><td class="">24 h</td><td class="n">24,92</td><td class="n">26,36</td><td class="n">25,78</td><td class="n">1,03</td></tr><tr><td class="">B. LSTM profunda</td><td class="">48 h</td><td class="n">24,46</td><td class="n">26,81</td><td class="n">26,10</td><td class="n">1,07</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">12 h</td><td class="n">23,95</td><td class="n">25,81</td><td class="n">25,03</td><td class="n">1,04</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">24 h</td><td class="n">24,12</td><td class="n">26,41</td><td class="n">25,83</td><td class="n">1,07</td></tr><tr><td class="">C. CNN-LSTM</td><td class="">48 h</td><td class="n">24,45</td><td class="n">26,70</td><td class="n">27,29</td><td class="n">1,12</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> RMSE en MW, calculado sobre las ventanas válidas de cada conjunto. La última columna es el cociente entre el RMSE de prueba y el de entrenamiento.</p></div>
+<figure><p class="t-num">Figura 10</p><p class="t-tit">RMSE en entrenamiento, validación y prueba por modelo</p><img src="informe/fig_10.png" alt="RMSE en entrenamiento, validación y prueba por modelo"><p class="nota"><em>Nota.</em> El tono claro corresponde a entrenamiento y el sólido, a prueba.</p></figure>
+<p>El cociente entre el RMSE de prueba y el de entrenamiento está entre 1,03 y 1,12: el error fuera de la muestra es solo de 3 a 12 % mayor que dentro. Por tanto, no hay sobreajuste relevante y los modelos generalizan a un periodo (septiembre a diciembre de 2026) que nunca vieron. Los modelos con Dropout (B y C) tienen las brechas más bajas, y las ventanas de 48 horas las más altas, porque disponen de menos muestras para la misma cantidad de parámetros. Validación y prueba quedan muy cerca, lo que indica que la validación fue un buen criterio para seleccionar el modelo.</p>
+</section><section class=""><h2 id="experimentos-de-control">Experimentos de control</h2>
+<p>Para responder con evidencia las preguntas sobre Dropout, detención temprana y número de neuronas, se entrenaron variantes con la ventana de 12 horas, cambiando un solo factor a la vez. Los resultados aparecen en la Tabla 11 y en la Figura 11.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 11</p><p class="t-tit">Resultados de los experimentos de control</p><div class="tabla-wrap"><table class="datos envolver"><thead><tr><th class="">Variante</th><th class="n">Parámetros</th><th class="n">Épocas</th><th class="n">RMSE entrenamiento</th><th class="n">RMSE prueba</th><th class="n">R² prueba</th><th class="n">Brecha</th></tr></thead><tbody><tr><td class="">A con 32 neuronas + Early Stopping (referencia)</td><td class="n">6 177</td><td class="n">60</td><td class="n">23,32</td><td class="n">25,01</td><td class="n">0,9076</td><td class="n">1,69</td></tr><tr><td class="">B con Dropout 0,2 (referencia)</td><td class="n">33 441</td><td class="n">54</td><td class="n">23,95</td><td class="n">24,74</td><td class="n">0,9096</td><td class="n">0,79</td></tr><tr><td class="">B sin Dropout</td><td class="n">33 441</td><td class="n">41</td><td class="n">23,23</td><td class="n">25,26</td><td class="n">0,9058</td><td class="n">2,03</td></tr><tr><td class="">A sin Early Stopping</td><td class="n">6 177</td><td class="n">150</td><td class="n">21,08</td><td class="n">28,87</td><td class="n">0,8769</td><td class="n">7,79</td></tr><tr><td class="">A con 8 neuronas</td><td class="n">777</td><td class="n">80</td><td class="n">24,80</td><td class="n">25,22</td><td class="n">0,9061</td><td class="n">0,42</td></tr><tr><td class="">A con 128 neuronas</td><td class="n">73 857</td><td class="n">41</td><td class="n">22,88</td><td class="n">24,92</td><td class="n">0,9083</td><td class="n">2,04</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> Ventana de 12 horas. RMSE en MW. La brecha es la diferencia entre el RMSE de prueba y el de entrenamiento.</p></div>
+<figure><p class="t-num">Figura 11</p><p class="t-tit">Curvas de entrenamiento y validación de los experimentos de control</p><img src="informe/fig_11.png" alt="Curvas de entrenamiento y validación de los experimentos de control"><p class="nota"><em>Nota.</em> Las curvas punteadas corresponden a entrenamiento y las sólidas, a validación.</p></figure>
 <ul>
-<li><strong>Los 9 modelos superan ampliamente a la persistencia:</strong> RMSE de 24,8-27,3 MW frente a 44,3 MW (entre 38 % y 44 % menos error) y R² de 0,89-0,91 frente a 0,70.</li>
-<li><strong>La ventana de 12 h es la mejor en las tres arquitecturas</strong> y la de 48 h la peor.</li>
-<li><strong>Las diferencias entre arquitecturas son pequeñas</strong> (≤ 0,6 MW de RMSE con la misma ventana), menores que el efecto de cambiar la ventana.</li>
+<li><em>Sin detención temprana</em> (150 épocas fijas), la pérdida de validación empieza a subir alrededor de la época 35 mientras la de entrenamiento sigue bajando. El RMSE de prueba empeora de 25,0 a 28,9 MW (un 15 % más), un caso claro de sobreajuste.</li>
+<li><em>Sin Dropout</em> en la arquitectura B, la brecha entre prueba y entrenamiento pasa de 0,8 a 2,0 MW y el RMSE de prueba sube de 24,7 a 25,3 MW.</li>
+<li><em>Con distinto número de neuronas,</em> el RMSE de prueba es de 25,2 MW con 8 neuronas (777 parámetros), de 25,0 MW con 32 y de 24,9 MW con 128 (73 857 parámetros, 95 veces más). Multiplicar los parámetros casi no mejora el resultado y amplía la brecha de generalización.</li>
 </ul>
-<figure><img src="informe/fig_06.png" alt="Comparación de RMSE, MAPE y R² de los 9 modelos en el conjunto común de prueba. La línea discontinua es la persistencia."><figcaption><strong>Figura 6.</strong> Comparación de RMSE, MAPE y R² de los 9 modelos en el conjunto común de prueba. La línea discontinua es la persistencia.</figcaption></figure>
-<h3>8.3 Selección del modelo</h3>
-<p>El modelo final se eligió con el <strong>RMSE de validación</strong> (también sobre instantes comunes), no con el de prueba. Elegir mirando el conjunto de prueba lo convertiría en otro conjunto de ajuste y la estimación del error dejaría de ser honesta. El modelo seleccionado es <strong>A · LSTM base con ventana de 12 h</strong> (RMSE de validación de 25,26 MW, el menor de los nueve). En prueba obtiene <strong>MAE = 19,86 MW, RMSE = 24,99 MW, MAPE = 3,43 % y R² = 0,904</strong>.</p>
-<h3>8.4 Demanda real vs. predicha</h3>
-<figure><img src="informe/fig_07.png" alt="Arriba: demanda real y predicha durante todo el periodo de prueba (los huecos corresponden a ventanas descartadas por datos inválidos). Abajo: zoom de una semana continua y diagrama de dispersión real vs. predicha."><figcaption><strong>Figura 7.</strong> Arriba: demanda real y predicha durante todo el periodo de prueba (los huecos corresponden a ventanas descartadas por datos inválidos). Abajo: zoom de una semana continua y diagrama de dispersión real vs. predicha.</figcaption></figure>
-<figure><img src="informe/fig_08.png" alt="Demanda real y predicciones de las tres arquitecturas (ventana de 12 h) durante la misma semana."><figcaption><strong>Figura 8.</strong> Demanda real y predicciones de las tres arquitecturas (ventana de 12 h) durante la misma semana.</figcaption></figure>
-<p>El modelo sigue con precisión el ciclo diario, incluidas las subidas de la mañana y la tarde y los valles nocturnos. Las tres arquitecturas producen curvas casi superpuestas.</p>
-<h3>8.5 Error de predicción</h3>
-<figure><img src="informe/fig_09.png" alt="Error del modelo seleccionado en el tiempo, su distribución y el error absoluto medio según la hora que se predice."><figcaption><strong>Figura 9.</strong> Error del modelo seleccionado en el tiempo, su distribución y el error absoluto medio según la hora que se predice.</figcaption></figure>
-<p>El error está <strong>centrado en cero</strong> (sesgo medio de −0,7 MW), es decir, el modelo no sobrestima ni subestima de forma sistemática. Su distribución es aproximadamente simétrica: el 68,9 % de las horas tiene un error absoluto menor de 25 MW y el percentil 95 es de 49 MW. No hay una franja horaria con errores sistemáticamente mayores.</p>
-</section>
-<section id="9-sobreajuste-y-generalización" class="nueva-pagina"><h2>9. Sobreajuste y generalización</h2>
-<p class="tabla-cap"><strong>Tabla 4.</strong> RMSE (MW) de cada modelo en entrenamiento, validación y prueba, y cociente prueba/entrenamiento.</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="">Ventana</th><th class="n">RMSE entren.</th><th class="n">RMSE valid.</th><th class="n">RMSE prueba</th><th class="n">Prueba / entren.</th></tr></thead><tbody><tr><td class="">A · LSTM base</td><td class="">12 h</td><td class="n">23,32</td><td class="n">25,43</td><td class="n">25,01</td><td class="n">1,07</td></tr><tr><td class="">A · LSTM base</td><td class="">24 h</td><td class="n">24,08</td><td class="n">26,08</td><td class="n">25,71</td><td class="n">1,07</td></tr><tr><td class="">A · LSTM base</td><td class="">48 h</td><td class="n">23,96</td><td class="n">26,31</td><td class="n">26,80</td><td class="n">1,12</td></tr><tr><td class="">B · LSTM profunda</td><td class="">12 h</td><td class="n">23,95</td><td class="n">25,53</td><td class="n">24,74</td><td class="n">1,03</td></tr><tr><td class="">B · LSTM profunda</td><td class="">24 h</td><td class="n">24,92</td><td class="n">26,36</td><td class="n">25,78</td><td class="n">1,03</td></tr><tr><td class="">B · LSTM profunda</td><td class="">48 h</td><td class="n">24,46</td><td class="n">26,81</td><td class="n">26,10</td><td class="n">1,07</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">12 h</td><td class="n">23,95</td><td class="n">25,81</td><td class="n">25,03</td><td class="n">1,04</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">24 h</td><td class="n">24,12</td><td class="n">26,41</td><td class="n">25,83</td><td class="n">1,07</td></tr><tr><td class="">C · CNN-LSTM</td><td class="">48 h</td><td class="n">24,45</td><td class="n">26,70</td><td class="n">27,29</td><td class="n">1,12</td></tr></tbody></table></div>
-<figure><img src="informe/fig_10.png" alt="RMSE en entrenamiento (tono claro), validación y prueba (tono sólido) por modelo."><figcaption><strong>Figura 10.</strong> RMSE en entrenamiento (tono claro), validación y prueba (tono sólido) por modelo.</figcaption></figure>
-<p>El cociente entre el RMSE de prueba y el de entrenamiento está entre <strong>1,03 y 1,12</strong>: el error fuera de la muestra es solo 3-12 % mayor que dentro. Por tanto, <strong>no hay sobreajuste relevante</strong> y los modelos generalizan a un periodo (septiembre-diciembre de 2026) que nunca vieron. Los modelos con Dropout (B y C) tienen las brechas más bajas, y las ventanas de 48 h las más altas, porque tienen menos muestras para la misma cantidad de parámetros. Validación y prueba quedan muy cerca, señal de que la validación fue un buen criterio para seleccionar el modelo.</p>
-</section>
-<section id="10-experimentos-de-control"><h2>10. Experimentos de control</h2>
-<p>Para responder con evidencia las preguntas sobre Dropout, Early Stopping y número de neuronas, se entrenaron variantes con la ventana de 12 h cambiando <strong>un solo factor</strong> a la vez.</p>
-<p class="tabla-cap"><strong>Tabla 5.</strong> Experimentos de control (ventana de 12 h). RMSE en MW.</p><div class="tabla-wrap"><table class="datos envolver"><thead><tr><th class="">Variante</th><th class="n">Parám.</th><th class="n">Épocas</th><th class="n">RMSE entren.</th><th class="n">RMSE prueba</th><th class="n">R² prueba</th><th class="n">Brecha*</th></tr></thead><tbody><tr><td class="">A con 32 neuronas + Early Stopping <em>(referencia)</em></td><td class="n">6 177</td><td class="n">60</td><td class="n">23,32</td><td class="n">25,01</td><td class="n">0,9076</td><td class="n">1,69</td></tr><tr><td class="">B con Dropout 0.2 <em>(referencia)</em></td><td class="n">33 441</td><td class="n">54</td><td class="n">23,95</td><td class="n">24,74</td><td class="n">0,9096</td><td class="n">0,79</td></tr><tr><td class="">B sin Dropout</td><td class="n">33 441</td><td class="n">41</td><td class="n">23,23</td><td class="n">25,26</td><td class="n">0,9058</td><td class="n">2,03</td></tr><tr><td class="">A sin Early Stopping</td><td class="n">6 177</td><td class="n">150</td><td class="n">21,08</td><td class="n">28,87</td><td class="n">0,8769</td><td class="n">7,79</td></tr><tr><td class="">A con 8 neuronas</td><td class="n">777</td><td class="n">80</td><td class="n">24,80</td><td class="n">25,22</td><td class="n">0,9061</td><td class="n">0,42</td></tr><tr><td class="">A con 128 neuronas</td><td class="n">73 857</td><td class="n">41</td><td class="n">22,88</td><td class="n">24,92</td><td class="n">0,9083</td><td class="n">2,04</td></tr></tbody></table></div><p class="tabla-cap" style="margin-top:4px">* Brecha = RMSE de prueba − RMSE de entrenamiento (MW).</p>
-<figure><img src="informe/fig_11.png" alt="Curvas de entrenamiento (punteadas) y validación (sólidas) de los experimentos de Dropout, Early Stopping y número de neuronas."><figcaption><strong>Figura 11.</strong> Curvas de entrenamiento (punteadas) y validación (sólidas) de los experimentos de Dropout, Early Stopping y número de neuronas.</figcaption></figure>
+</section><section class=""><h2 id="evidencia-adicional">Evidencia adicional</h2>
+<h3 id="comparación-con-modelos-de-referencia">Comparación con modelos de referencia</h3>
+<p>Para medir el aporte de la LSTM, se comparó con la persistencia y con una regresión lineal regularizada (Ridge) que recibe exactamente la misma ventana de 12 horas aplanada, es decir, 180 entradas (ver Tabla 12).</p>
+<div class="tabla-apa"><p class="t-num">Tabla 12</p><p class="t-tit">Comparación de la LSTM con modelos de referencia</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="n">MAE</th><th class="n">MSE</th><th class="n">RMSE</th><th class="n">MAPE</th><th class="n">R²</th></tr></thead><tbody><tr><td class="">Persistencia</td><td class="n">35,50</td><td class="n">1 963,3</td><td class="n">44,31</td><td class="n">6,07 %</td><td class="n">0,6974</td></tr><tr><td class="">Regresión lineal (Ridge, 12 h)</td><td class="n">22,53</td><td class="n">874,2</td><td class="n">29,57</td><td class="n">3,90 %</td><td class="n">0,8652</td></tr><tr><td class="">LSTM A (12 h)</td><td class="n">19,86</td><td class="n">624,6</td><td class="n">24,99</td><td class="n">3,43 %</td><td class="n">0,9037</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> Conjunto común de prueba. MAE, MSE y RMSE en MW.</p></div>
+<p>La LSTM reduce el RMSE en un 15 % frente a la regresión lineal y en un 44 % frente a la persistencia. La diferencia con el modelo lineal corresponde a lo que aportan la memoria y la no linealidad de la red.</p>
+<h3 id="importancia-de-las-variables">Importancia de las variables</h3>
+<p>Se midió la importancia por permutación (Breiman, 2001): se desordenan los valores de una variable entre las muestras de prueba y se observa cuánto aumenta el RMSE del modelo seleccionado (ver Figura 12).</p>
+<figure><p class="t-num">Figura 12</p><p class="t-tit">Importancia de las variables por permutación en el modelo seleccionado</p><img src="informe/fig_12.png" alt="Importancia de las variables por permutación en el modelo seleccionado"><p class="nota"><em>Nota.</em> Aumento del RMSE (MW) al permutar cada variable; las codificaciones seno y coseno de una misma variable se permutan juntas.</p></figure>
+<h3 id="dónde-se-equivoca-más-el-modelo">Dónde se equivoca más el modelo</h3>
+<p>La Tabla 13 muestra el error del modelo según el tipo de día que se predice.</p>
+<div class="tabla-apa"><p class="t-num">Tabla 13</p><p class="t-tit">Error absoluto medio del modelo seleccionado según el tipo de día</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Hora predicha</th><th class="n">MAE (MW)</th><th class="n">Horas en prueba</th></tr></thead><tbody><tr><td class="">Festivo</td><td class="n">34,84</td><td class="n">38</td></tr><tr><td class="">No festivo</td><td class="n">19,64</td><td class="n">2 055</td></tr><tr><td class="">Fin de semana</td><td class="n">20,01</td><td class="n">621</td></tr><tr><td class="">Día laboral</td><td class="n">19,87</td><td class="n">1 472</td></tr></tbody></table></div><p class="nota"><em>Nota.</em> Conjunto de prueba con ventana de 12 horas.</p></div>
+</section><section class=""><h2 id="preguntas-de-análisis">Preguntas de análisis</h2>
+<h3 id="por-qué-lstm-es-apropiada-para-este-problema">¿Por qué LSTM es apropiada para este problema?</h3>
+<p>La demanda eléctrica es una serie temporal: el valor de la próxima hora depende de lo ocurrido en las horas anteriores, por la inercia del consumo, las rampas de la mañana y de la tarde y el ciclo diario. Una red densa trata cada entrada como independiente y no tiene noción de orden. Una red recurrente simple sí la tiene, pero sufre el desvanecimiento del gradiente y olvida lo ocurrido hace muchas horas (Goodfellow et al., 2016).</p>
+<p>La LSTM resuelve este problema con una celda de memoria controlada por tres compuertas (Hochreiter y Schmidhuber, 1997):</p>
 <ul>
-<li><strong>Sin Early Stopping</strong> (150 épocas fijas): la pérdida de validación empieza a <strong>subir</strong> alrededor de la época 35 mientras la de entrenamiento sigue bajando. El RMSE de prueba empeora de 25,0 a <strong>28,9 MW</strong> (+15 %). Es un caso claro de sobreajuste.</li>
-<li><strong>Sin Dropout</strong> (arquitectura B): la brecha entre prueba y entrenamiento pasa de 0,8 a <strong>2,0 MW</strong> y el RMSE de prueba sube de 24,7 a 25,3 MW.</li>
-<li><strong>Número de neuronas:</strong> con 8 neuronas (777 parámetros) el RMSE de prueba es 25,2 MW; con 32, 25,0 MW; con 128 (73 857 parámetros, 95 veces más), 24,9 MW. Multiplicar los parámetros casi no mejora el resultado y amplía la brecha de generalización.</li>
+<li>la de olvido, que decide qué información descartar;</li>
+<li>la de entrada, que decide qué información nueva incorporar;</li>
+<li>la de salida, que decide qué exponer en cada paso.</li>
 </ul>
-</section>
-<section id="11-evidencia-adicional" class="nueva-pagina"><h2>11. Evidencia adicional</h2>
-<h3>11.1 Comparación con modelos de referencia</h3>
-<p class="tabla-cap"><strong>Tabla 6.</strong> LSTM frente a la persistencia y a una regresión lineal (Ridge) que recibe exactamente la misma ventana de 12 h (180 entradas), sobre el conjunto común de prueba.</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Modelo</th><th class="n">MAE</th><th class="n">MSE</th><th class="n">RMSE</th><th class="n">MAPE</th><th class="n">R²</th></tr></thead><tbody><tr class="referencia"><td class="">Persistencia</td><td class="n">35,50</td><td class="n">1 963,3</td><td class="n">44,31</td><td class="n">6,07 %</td><td class="n">0,6974</td></tr><tr><td class="">Regresión lineal (Ridge, 12 h)</td><td class="n">22,53</td><td class="n">874,2</td><td class="n">29,57</td><td class="n">3,90 %</td><td class="n">0,8652</td></tr><tr class="destacado"><td class="">LSTM A (12 h)</td><td class="n">19,86</td><td class="n">624,6</td><td class="n">24,99</td><td class="n">3,43 %</td><td class="n">0,9037</td></tr></tbody></table></div>
-<p>La LSTM reduce el RMSE un 15 % frente a la regresión lineal y un 44 % frente a la persistencia. Esa diferencia con el modelo lineal es lo que aportan la memoria y la no linealidad de la red.</p>
-<h3>11.2 Importancia de las variables</h3>
-<p>Se midió la <strong>importancia por permutación</strong>: se desordenan los valores de una variable entre las muestras de prueba y se observa cuánto aumenta el RMSE del modelo seleccionado.</p>
-<figure><img src="informe/fig_12.png" alt="Aumento del RMSE (MW) al permutar cada variable en el modelo seleccionado."><figcaption><strong>Figura 12.</strong> Aumento del RMSE (MW) al permutar cada variable en el modelo seleccionado.</figcaption></figure>
-<h3>11.3 Dónde se equivoca más el modelo</h3>
-<p class="tabla-cap"><strong>Tabla 7.</strong> Error absoluto medio del modelo seleccionado según el tipo de día que se predice.</p><div class="tabla-wrap"><table class="datos"><thead><tr><th class="">Hora predicha</th><th class="n">MAE (MW)</th><th class="n">Horas en prueba</th></tr></thead><tbody><tr><td class="">Festivo</td><td class="n">34,84</td><td class="n">38</td></tr><tr><td class="">No festivo</td><td class="n">19,64</td><td class="n">2 055</td></tr><tr><td class="">Fin de semana</td><td class="n">20,01</td><td class="n">621</td></tr><tr><td class="">Día laboral</td><td class="n">19,87</td><td class="n">1 472</td></tr></tbody></table></div>
-</section>
-<section id="12-preguntas-de-análisis" class="nueva-pagina"><h2>12. Preguntas de análisis</h2>
-<h3>12.1 ¿Por qué LSTM es apropiada para este problema?</h3>
-<p>La demanda eléctrica es una <strong>serie temporal</strong>: el valor de la próxima hora depende de lo que ocurrió en las horas anteriores (inercia del consumo, rampas de la mañana y la tarde, ciclo diario). Una red densa trata cada entrada como independiente y no tiene noción de orden. Una RNN simple sí la tiene, pero sufre de <strong>desvanecimiento del gradiente</strong> y &quot;olvida&quot; lo ocurrido hace muchas horas.</p>
-<p>La LSTM resuelve este problema con una <strong>celda de memoria</strong> controlada por tres <strong>compuertas</strong>:</p>
-<ul>
-<li>la de <strong>olvido</strong>, que decide qué información descartar;</li>
-<li>la de <strong>entrada</strong>, que decide qué información nueva incorporar;</li>
-<li>la de <strong>salida</strong>, que decide qué exponer en cada paso.</li>
-</ul>
-<p>Además:</p>
-<ul>
-<li>acepta entradas <strong>multivariadas</strong> (demanda, clima, precio y calendario a la vez) y aprende relaciones <strong>no lineales</strong> entre ellas;</li>
-<li>lee la ventana <strong>en orden</strong>, así que puede usar la forma de la curva reciente (si viene subiendo o bajando) y no solo su nivel.</li>
-</ul>
-<p>La evidencia lo confirma (sección 11.1): con la misma ventana, la LSTM obtiene un RMSE de 25,0 MW, frente a 29,6 MW de una regresión lineal y 44,3 MW de la persistencia.</p>
-<h3>12.2 ¿Qué efecto tiene cambiar la ventana temporal?</h3>
-<p>En las <strong>tres arquitecturas</strong>, la ventana de <strong>12 h fue la mejor y la de 48 h la peor</strong>:</p>
-<div class="tabla-wrap"><table>
+<p>Además, acepta entradas multivariadas (demanda, clima, precio y calendario a la vez), aprende relaciones no lineales entre ellas y lee la ventana en orden. Así puede usar la forma de la curva reciente, si viene subiendo o bajando, y no solo su nivel.</p>
+<p>La evidencia lo confirma: con la misma ventana, la LSTM obtiene un RMSE de 25,0 MW, frente a 29,6 MW de una regresión lineal y 44,3 MW de la persistencia.</p>
+<h3 id="qué-efecto-tiene-cambiar-la-ventana-temporal">¿Qué efecto tiene cambiar la ventana temporal?</h3>
+<p>En las tres arquitecturas, la ventana de 12 horas fue la mejor y la de 48 horas la peor (ver Tabla 14).</p>
+<div class="tabla-apa"><p class="t-num">Tabla 14</p><p class="t-tit">RMSE en el conjunto común de prueba según la arquitectura y la ventana</p><div class="tabla-wrap"><table>
 <thead>
 <tr>
   <th>Arquitectura</th>
-  <th>RMSE 12 h</th>
-  <th>RMSE 24 h</th>
-  <th>RMSE 48 h</th>
+  <th>12 horas</th>
+  <th>24 horas</th>
+  <th>48 horas</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>A</td>
-  <td>25,0 MW</td>
-  <td>25,5 MW</td>
-  <td>26,8 MW</td>
+  <td>A. LSTM base</td>
+  <td>25,0</td>
+  <td>25,5</td>
+  <td>26,8</td>
 </tr>
 <tr>
-  <td>B</td>
-  <td>24,8 MW</td>
-  <td>25,7 MW</td>
-  <td>26,1 MW</td>
+  <td>B. LSTM profunda</td>
+  <td>24,8</td>
+  <td>25,7</td>
+  <td>26,1</td>
 </tr>
 <tr>
-  <td>C</td>
-  <td>25,3 MW</td>
-  <td>25,5 MW</td>
-  <td>27,3 MW</td>
+  <td>C. CNN-LSTM</td>
+  <td>25,3</td>
+  <td>25,5</td>
+  <td>27,3</td>
 </tr>
 </tbody>
-</table></div>
-<p>Hay un compromiso:</p>
+</table></div><p class="nota"><em>Nota.</em> Valores en MW.</p></div>
+<p>Cambiar la ventana implica un compromiso:</p>
 <ul>
-<li><strong>Ventana más larga:</strong> da más contexto, pero implica más entradas, un gradiente que debe propagarse por más pasos y <strong>menos muestras de entrenamiento</strong> (9 686 con 12 h frente a 4 504 con 48 h, por las ventanas descartadas). El resultado es peor generalización: el cociente prueba/entrenamiento sube de 1,07 a 1,12 en A y C.</li>
-<li><strong>Ventana más corta:</strong> da menos contexto, pero aquí no hace falta más. El ciclo diario ya llega al modelo mediante la codificación cíclica de la hora y el día, y el nivel actual de la demanda está en las últimas horas.</li>
+<li><em>Ventana más larga.</em> Ofrece más contexto, pero implica más entradas, un gradiente que debe propagarse por más pasos y menos muestras de entrenamiento: 9 686 con 12 horas frente a 4 504 con 48 horas, por las ventanas descartadas. El resultado es una peor generalización: el cociente entre prueba y entrenamiento sube de 1,07 a 1,12 en A y C.</li>
+<li><em>Ventana más corta.</em> Ofrece menos contexto, pero en este caso no hace falta más: el ciclo diario ya llega al modelo mediante la codificación cíclica de la hora y del día, y el nivel actual de la demanda está en las últimas horas.</li>
 </ul>
-<p>Una ventana demasiado corta perdería la tendencia reciente. La longitud óptima depende del problema y debe elegirse con validación, como se hizo aquí.</p>
-<h3>12.3 ¿Existe sobreajuste?</h3>
-<p><strong>No hay sobreajuste relevante</strong> en los modelos finales:</p>
+<p>Una ventana demasiado corta perdería la tendencia reciente. La longitud óptima depende del problema y debe elegirse con validación, como se hizo en este trabajo.</p>
+<h3 id="existe-sobreajuste">¿Existe sobreajuste?</h3>
+<p>No hay sobreajuste relevante en los modelos finales:</p>
 <ul>
-<li>El RMSE de prueba es apenas 3-12 % mayor que el de entrenamiento (sección 9).</li>
-<li>Las curvas de validación se estabilizan sin la &quot;U&quot; característica del sobreajuste.</li>
+<li>El RMSE de prueba es solo de 3 a 12 % mayor que el de entrenamiento.</li>
+<li>Las curvas de validación se estabilizan, sin la forma de U característica del sobreajuste.</li>
 <li>La arquitectura A, sin regularización, muestra solo una brecha pequeña y controlada.</li>
 </ul>
-<p>El riesgo existía: la misma arquitectura A entrenada 150 épocas <strong>sin Early Stopping sí sobreajusta</strong>. Su RMSE de entrenamiento baja a 21,1 MW, pero el de prueba sube a 28,9 MW. El sobreajuste se evitó gracias a las decisiones de entrenamiento.</p>
-<h3>12.4 ¿Qué es y qué efecto tiene Dropout?</h3>
-<p><strong>Dropout</strong> es una técnica de regularización que, <strong>durante el entrenamiento</strong>, apaga aleatoriamente una fracción <em>p</em> de las neuronas en cada paso (aquí <em>p</em> = 0,2) y escala las restantes para compensar. Al predecir se desactiva y se usa la red completa. Sus efectos son:</p>
+<p>El riesgo, sin embargo, existía: la misma arquitectura A entrenada durante 150 épocas sin detención temprana sí sobreajusta. Su RMSE de entrenamiento baja a 21,1 MW, pero el de prueba sube a 28,9 MW. El sobreajuste se evitó gracias a las decisiones de entrenamiento.</p>
+<h3 id="qué-es-y-qué-efecto-tiene-dropout">¿Qué es y qué efecto tiene Dropout?</h3>
+<p>Dropout es una técnica de regularización que, durante el entrenamiento, apaga aleatoriamente una fracción <em>p</em> de las neuronas en cada paso (aquí, <em>p</em> = 0,2) y escala las restantes para compensar. Al predecir se desactiva y se usa la red completa (Srivastava et al., 2014). Tiene tres efectos:</p>
 <ul>
-<li>evita que las neuronas dependan de otras específicas (<strong>co-adaptación</strong>) y obliga a aprender representaciones redundantes y robustas;</li>
-<li>equivale a entrenar un <strong>conjunto de muchas subredes</strong> que comparten pesos y promediarlas al predecir;</li>
-<li>reduce el sobreajuste, a cambio de un entrenamiento algo más lento y ruidoso.</li>
+<li>Evita que las neuronas dependan de otras específicas (co-adaptación) y obliga a la red a aprender representaciones redundantes y robustas.</li>
+<li>Equivale a entrenar un conjunto de muchas subredes que comparten pesos y a promediarlas al predecir.</li>
+<li>Reduce el sobreajuste, a cambio de un entrenamiento algo más lento y ruidoso.</li>
 </ul>
-<p>En el experimento de control, quitar el Dropout de la arquitectura B amplió la brecha entre prueba y entrenamiento de 0,8 a 2,0 MW y empeoró el RMSE de prueba (24,7 → 25,3 MW). También explica por qué en B y C la pérdida de validación queda por debajo de la de entrenamiento.</p>
-<h3>12.5 ¿Qué es y qué efecto tiene Early Stopping?</h3>
-<p><strong>Early Stopping</strong> vigila una métrica de validación (aquí la pérdida) y <strong>detiene el entrenamiento cuando deja de mejorar</strong> durante un número de épocas (paciencia = 10). Con la opción de restaurar los mejores pesos, el modelo final conserva los de la mejor época y no los de la última. Sus efectos son:</p>
+<p>En el experimento de control, quitar el Dropout de la arquitectura B amplió la brecha entre prueba y entrenamiento de 0,8 a 2,0 MW y empeoró el RMSE de prueba de 24,7 a 25,3 MW. Esto también explica por qué en B y C la pérdida de validación queda por debajo de la de entrenamiento.</p>
+<h3 id="qué-es-y-qué-efecto-tiene-early-stopping">¿Qué es y qué efecto tiene Early Stopping?</h3>
+<p>La detención temprana (<em>early stopping</em>) vigila una métrica de validación, aquí la pérdida, y detiene el entrenamiento cuando deja de mejorar durante un número de épocas definido por la paciencia, que en este trabajo es de 10 (Prechelt, 1998). Al restaurar los mejores pesos, el modelo final conserva los de la mejor época y no los de la última. Tiene dos efectos:</p>
 <ul>
-<li><strong>evita el sobreajuste</strong>, porque corta justo cuando la red empieza a memorizar el ruido de entrenamiento;</li>
-<li><strong>elige automáticamente el número de épocas</strong> (entre 42 y 66 en este trabajo) y ahorra cómputo.</li>
+<li>Evita el sobreajuste, porque corta el entrenamiento justo cuando la red empieza a memorizar el ruido.</li>
+<li>Elige automáticamente el número de épocas (entre 42 y 66 en este trabajo) y ahorra cómputo.</li>
 </ul>
-<p>Sin Early Stopping, la pérdida de validación sube a partir de la época 35 aproximadamente y el RMSE de prueba empeora de 25,0 a 28,9 MW (+15 %).</p>
-<h3>12.6 ¿Más neuronas implican necesariamente mejores resultados?</h3>
-<p><strong>No.</strong> Dos comparaciones lo muestran:</p>
+<p>Sin detención temprana, la pérdida de validación sube a partir de la época 35 aproximadamente y el RMSE de prueba empeora de 25,0 a 28,9 MW.</p>
+<h3 id="más-neuronas-implican-necesariamente-mejores-resultados">¿Más neuronas implican necesariamente mejores resultados?</h3>
+<p>No. Dos comparaciones lo muestran:</p>
 <ul>
-<li><strong>Experimento de neuronas</strong> (arquitectura A, 12 h): con 8 neuronas el RMSE es 25,2 MW, con 32 es 25,0 MW y con 128 es 24,9 MW. Multiplicar los parámetros por 95 solo mejora 0,3 MW y la brecha de generalización crece de 0,4 a 2,0 MW.</li>
-<li><strong>Entre arquitecturas:</strong> B tiene 5 veces más parámetros que A y queda prácticamente empatada.</li>
+<li><em>Experimento de neuronas</em> (arquitectura A, ventana de 12 horas). El RMSE de prueba es de 25,2 MW con 8 neuronas, de 25,0 MW con 32 y de 24,9 MW con 128. Multiplicar los parámetros por 95 solo mejora 0,3 MW, y la brecha de generalización crece de 0,4 a 2,0 MW.</li>
+<li><em>Comparación entre arquitecturas.</em> B tiene cinco veces más parámetros que A y queda prácticamente empatada con ella.</li>
 </ul>
-<p>Más capacidad solo ayuda mientras el modelo esté subajustado. Una vez que capta los patrones reales, el error restante es ruido impredecible, y la capacidad extra se usa para memorizarlo, lo que produce sobreajuste. Además, cuesta más cómputo y datos.</p>
-<h3>12.7 ¿Qué modelo recomendaría para producción y por qué?</h3>
-<p>Se recomienda <strong>A · LSTM base con ventana de 12 h</strong>, por cuatro razones:</p>
-<ul>
-<li><strong>Tuvo el menor error en validación,</strong> que es el criterio correcto de selección. Su desempeño en prueba es MAE de 19,9 MW, RMSE de 25,0 MW, MAPE de 3,4 % y R² de 0,90.</li>
-<li><strong>Es el modelo más simple y ligero</strong> (6 177 parámetros): inferencia instantánea y fácil de reentrenar, mantener y explicar. Gracias a eso se pudo desplegar sin TensorFlow.</li>
-<li><strong>B no justifica su complejidad.</strong> Fue 0,2 MW mejor en prueba, una diferencia dentro del ruido que no compensa tener 5 veces más parámetros. Ante un empate, la parsimonia favorece al modelo simple.</li>
-<li><strong>La ventana de 12 h requiere poca historia.</strong> En operación, un dato faltante tiene menos probabilidad de impedir la predicción que con 24 o 48 h.</li>
-</ul>
-<p>En producción debería acompañarse de monitoreo del error, validación de las entradas con las mismas reglas de limpieza y reentrenamiento periódico.</p>
-<h3>12.8 ¿Qué variables pueden influir más en la demanda?</h3>
-<p>Según la importancia por permutación (sección 11.2), el modelo depende sobre todo del <strong>calendario</strong>:</p>
+<p>Más capacidad solo ayuda mientras el modelo esté subajustado. Una vez que capta los patrones reales, el error restante es ruido impredecible, y la capacidad adicional se usa para memorizarlo, es decir, produce sobreajuste. Además, cuesta más cómputo y más datos (Goodfellow et al., 2016).</p>
+<h3 id="qué-modelo-recomendaría-para-producción-y-por-qué">¿Qué modelo recomendaría para producción y por qué?</h3>
+<p>Se recomienda la LSTM base (A) con ventana de 12 horas, por cuatro razones:</p>
 <ol>
-<li><strong>Hora del día</strong> (+48,7 MW de RMSE al permutarla), de lejos la más importante.</li>
-<li><strong>Fin de semana</strong> (+23,3 MW).</li>
-<li><strong>Día de la semana</strong> (+15,8 MW).</li>
+<li>Tuvo el menor error en validación, que es el criterio correcto de selección. En prueba obtuvo un MAE de 19,9 MW, un RMSE de 25,0 MW, un MAPE de 3,4 % y un R² de 0,90.</li>
+<li>Es el modelo más simple y ligero (6 177 parámetros): su inferencia es instantánea y es fácil de reentrenar, mantener y explicar. Gracias a eso pudo desplegarse sin TensorFlow.</li>
+<li>B no justifica su complejidad: fue 0,2 MW mejor en prueba, una diferencia dentro del ruido que no compensa tener cinco veces más parámetros. Ante un empate, la parsimonia favorece al modelo simple.</li>
+<li>La ventana de 12 horas requiere poca historia, así que en operación es menos probable que un dato faltante impida la predicción que con 24 o 48 horas.</li>
 </ol>
-<p>Les siguen la <strong>radiación solar</strong> (+9,6 MW), los <strong>festivos</strong> (+4,0 MW), la <strong>demanda reciente</strong> (+3,7 MW) y las variables climáticas (humedad +3,3 MW y temperatura +3,1 MW) y el precio (+2,3 MW). El viento, el mes y la precipitación casi no aportan. Esto es coherente con el análisis exploratorio: perfil diario marcado, demanda menor en fin de semana (r = −0,49) y relación con la temperatura (r = 0,48) y la radiación (r = −0,50).</p>
-<p>Dos matices:</p>
+<p>En producción, el modelo debería acompañarse de monitoreo del error, de la validación de las entradas con las mismas reglas de limpieza y de un reentrenamiento periódico.</p>
+<h3 id="qué-variables-pueden-influir-más-en-la-demanda">¿Qué variables pueden influir más en la demanda?</h3>
+<p>Según la importancia por permutación, el modelo depende sobre todo del calendario: la hora del día (+48,7 MW de RMSE al permutarla), el fin de semana (+23,3 MW) y el día de la semana (+15,8 MW). Les siguen:</p>
 <ul>
-<li>La importancia por permutación <strong>no implica causalidad</strong>, y las variables correlacionadas se reparten la importancia (por ejemplo, la radiación depende de la hora).</li>
+<li>la radiación solar (+9,6 MW);</li>
+<li>los festivos (+4,0 MW);</li>
+<li>la demanda reciente (+3,7 MW);</li>
+<li>la humedad (+3,3 MW) y la temperatura (+3,1 MW);</li>
+<li>el precio (+2,3 MW).</li>
+</ul>
+<p>El viento, el mes y la precipitación casi no aportan. Esto es coherente con el análisis exploratorio, que mostró un perfil diario marcado, una demanda menor en fin de semana (<em>r</em> = −0,49) y su relación con la temperatura (<em>r</em> = 0,48) y la radiación (<em>r</em> = −0,50).</p>
+<p>Hay dos matices:</p>
+<ul>
+<li>La importancia por permutación no implica causalidad, y las variables correlacionadas se reparten la importancia; por ejemplo, la radiación depende de la hora.</li>
 <li>La demanda reciente aparece más abajo de lo que su correlación sugiere (0,88), porque gran parte de su información ya está contenida en el calendario y el clima.</li>
 </ul>
-<h3>12.9 ¿Qué limitaciones tiene el modelo?</h3>
+<h3 id="qué-limitaciones-tiene-el-modelo">¿Qué limitaciones tiene el modelo?</h3>
 <ul>
-<li><strong>Festivos:</strong> el error medio en horas festivas es de 34,8 MW, casi el doble que en días normales (19,6 MW). El entrenamiento solo incluye 8 días festivos (192 horas).</li>
-<li><strong>Datos faltantes en operación:</strong> como no se imputa, si alguna de las últimas 12 horas tiene un valor inválido no se puede predecir. Un sistema real necesitaría un plan de contingencia.</li>
-<li><strong>Horizonte de una hora:</strong> para planear el día siguiente habría que predecir de forma recursiva (los errores se acumulan) o entrenar un modelo de varios horizontes.</li>
-<li><strong>Sin pronósticos exógenos:</strong> usa el clima observado hasta <em>t</em>, no pronósticos meteorológicos de <em>t + 1</em>.</li>
-<li><strong>Historia corta:</strong> dos años de datos implican pocos ciclos de cada estación, y la prueba solo cubre septiembre-diciembre.</li>
-<li><strong>Cambios bruscos:</strong> cerca del 5 % de las horas tienen errores mayores de 50 MW, en general en cambios abruptos que el modelo suaviza.</li>
-<li><strong>Predicción puntual:</strong> no entrega un intervalo de confianza.</li>
-<li><strong>Deriva de los datos:</strong> si cambian los patrones de consumo, el modelo debe reentrenarse.</li>
+<li><em>Festivos.</em> El error medio en horas festivas es de 34,8 MW, casi el doble que en los días normales (19,6 MW). El entrenamiento solo incluye 8 días festivos (192 horas).</li>
+<li><em>Datos faltantes en operación.</em> Como no se imputa, si alguna de las últimas 12 horas tiene un valor inválido no se puede predecir. Un sistema real necesitaría un plan de contingencia.</li>
+<li><em>Horizonte de una hora.</em> Para planear el día siguiente habría que predecir de forma recursiva, con acumulación de errores, o entrenar un modelo de varios horizontes.</li>
+<li><em>Sin pronósticos exógenos.</em> El modelo usa el clima observado hasta <em>t</em>, no pronósticos meteorológicos de <em>t</em> + 1.</li>
+<li><em>Historia corta.</em> Dos años de datos implican pocos ciclos de cada estación, y la prueba solo cubre de septiembre a diciembre.</li>
+<li><em>Cambios bruscos.</em> Cerca del 5 % de las horas tiene errores mayores de 50 MW, en general en cambios abruptos que el modelo suaviza.</li>
+<li><em>Predicción puntual.</em> El modelo no entrega un intervalo de confianza.</li>
+<li><em>Deriva de los datos.</em> Si cambian los patrones de consumo, el modelo debe reentrenarse.</li>
 </ul>
-</section>
-<section id="13-despliegue" class="nueva-pagina"><h2>13. Despliegue</h2>
-<p>El modelo seleccionado se desplegó como una aplicación web pública en Vercel: <strong><a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a></strong>.</p>
-<figure><img src="informe/app_prediccion.png" alt="Página de predicción de la aplicación web desplegada."><figcaption><strong>Figura 13.</strong> Página de predicción de la aplicación web desplegada.</figcaption></figure>
-<p><strong>Funcionamiento.</strong> El usuario ingresa las variables independientes (x) de las últimas 12 horas: las carga desde el histórico, las escribe a mano o sube un archivo CSV. La aplicación muestra la predicción de la demanda de la hora siguiente (y), con su rango típico de error (± RMSE), una gráfica con la demanda reciente y, si existe, el valor real para comparar. También permite simular escenarios, por ejemplo subir la temperatura, cambiar la radiación o marcar un festivo. Una segunda página presenta los resultados y el análisis del taller.</p>
-<p><strong>Arquitectura técnica.</strong></p>
+</section><section class=""><h2 id="despliegue">Despliegue</h2>
+<p>El modelo seleccionado se desplegó como una aplicación web pública en Vercel (<a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a>). Su página de predicción aparece en la Figura 13.</p>
+<figure><p class="t-num">Figura 13</p><p class="t-tit">Página de predicción de la aplicación web desplegada</p><img src="informe/app_prediccion.png" alt="Página de predicción de la aplicación web desplegada"><p class="nota"><em>Nota.</em> Captura de la aplicación en funcionamiento con una ventana de 12 horas del periodo de prueba.</p></figure>
+<p>En la aplicación, el usuario ingresa las variables independientes (x) de las últimas 12 horas: puede cargarlas desde el histórico, escribirlas a mano o subir un archivo CSV. La aplicación muestra:</p>
 <ul>
-<li><strong>Frontend:</strong> HTML, CSS y JavaScript estáticos.</li>
-<li><strong>API:</strong> una función <em>serverless</em> en Python (<code>POST /api/predict</code>). Valida las entradas con <strong>las mismas reglas de limpieza</strong> del entrenamiento: si una hora tiene un dato faltante o fuera de rango, informa la fila y el campo exactos y no predice. Después construye las 15 variables por hora, normaliza con los parámetros de entrenamiento y ejecuta la red.</li>
-<li><strong>Inferencia sin TensorFlow:</strong> TensorFlow ocupa más de 500 MB y supera el límite de 250 MB de las funciones serverless. Como el modelo A tiene solo 6 177 parámetros, sus pesos se exportaron a JSON y el paso hacia adelante de la LSTM se implementó con NumPy. Se verificó sobre 300 ventanas de prueba que la implementación reproduce las predicciones de Keras con una diferencia máxima de 0,005 MW, que se explica por el redondeo a dos decimales.</li>
+<li>la predicción de la demanda de la hora siguiente (y), con su rango típico de error (± RMSE);</li>
+<li>una gráfica con la demanda reciente;</li>
+<li>el valor real para comparar, cuando existe.</li>
 </ul>
-</section>
-<section id="14-conclusiones"><h2>14. Conclusiones</h2>
-<ol>
-<li>Tras una limpieza estricta y justificada que <strong>no inventa valores</strong>, y con una preparación cronológica sin fuga de información, las LSTM predicen la demanda de la siguiente hora con <strong>MAPE ≈ 3,4 % y R² ≈ 0,90</strong> en un periodo nunca visto, con <strong>44 % menos error que la persistencia</strong> y 15 % menos que una regresión lineal.</li>
-<li>La <strong>ventana de 12 h</strong> fue la mejor en las tres arquitecturas. Las ventanas más largas aportan poco contexto adicional y reducen las muestras disponibles.</li>
-<li>Las diferencias entre arquitecturas fueron pequeñas: <strong>la complejidad adicional de la LSTM profunda y la CNN-LSTM no produjo mejoras relevantes</strong>. Se recomienda la LSTM base por su simplicidad, ligereza y robustez.</li>
-<li><strong>Dropout y Early Stopping</strong> fueron determinantes para evitar el sobreajuste, como demostraron los experimentos de control. Más neuronas no implicó mejores resultados.</li>
-<li>La demanda depende principalmente del <strong>calendario</strong> (hora, fin de semana y día) y, en segundo lugar, del clima y la demanda reciente. El principal punto débil del modelo son los <strong>festivos</strong>.</li>
-<li>El modelo se desplegó en una aplicación web que permite ingresar las variables y obtener la predicción. Respeta las mismas reglas de calidad de datos del entrenamiento.</li>
-</ol>
-</section>
-<section id="referencias"><h2>Referencias</h2>
-<ol>
-<li>Hochreiter, S., y Schmidhuber, J. (1997). Long Short-Term Memory. <em>Neural Computation, 9</em>(8), 1735-1780.</li>
-<li>Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., y Salakhutdinov, R. (2014). Dropout: A Simple Way to Prevent Neural Networks from Overfitting. <em>Journal of Machine Learning Research, 15</em>, 1929-1958.</li>
-<li>Prechelt, L. (1998). Early Stopping — But When? En <em>Neural Networks: Tricks of the Trade</em> (pp. 55-69). Springer.</li>
-<li>Goodfellow, I., Bengio, Y., y Courville, A. (2016). <em>Deep Learning</em>. MIT Press.</li>
-<li>Hyndman, R. J., y Athanasopoulos, G. (2021). <em>Forecasting: Principles and Practice</em> (3.ª ed.). OTexts.</li>
-<li>Chollet, F., et al. (2015). <em>Keras</em>. https://keras.io</li>
-</ol>
-</section>
-    </article>
+<p>También permite simular escenarios, como subir la temperatura, cambiar la radiación o marcar un festivo. Otras dos páginas presentan los resultados del taller y este informe.</p>
+<p>La aplicación tiene tres componentes técnicos:</p>
+<ul>
+<li><em>Interfaz.</em> Está hecha con HTML, CSS y JavaScript estáticos.</li>
+<li><em>Servicio de predicción.</em> Es una función <em>serverless</em> en Python (<code>POST /api/predict</code>). Valida las entradas con las mismas reglas de limpieza del entrenamiento: si una hora tiene un dato faltante o fuera de rango, informa la fila y el campo exactos y no predice. Si las entradas son válidas, construye las 15 variables por hora, las normaliza con los parámetros de entrenamiento y ejecuta la red.</li>
+<li><em>Inferencia sin TensorFlow.</em> TensorFlow ocupa más de 500 MB y supera el límite de 250 MB de las funciones <em>serverless</em>. Como el modelo A tiene solo 6 177 parámetros, sus pesos se exportaron a JSON y el paso hacia adelante de la LSTM se implementó con NumPy. Se verificó sobre 300 ventanas de prueba que esta implementación reproduce las predicciones de Keras con una diferencia máxima de 0,005 MW, atribuible al redondeo a dos decimales.</li>
+</ul>
+</section><section class=""><h2 id="conclusiones">Conclusiones</h2>
+<p>Tras una limpieza estricta y justificada que no inventa valores, y con una preparación cronológica sin fuga de información, las LSTM predicen la demanda de la hora siguiente con un MAPE cercano a 3,4 % y un R² cercano a 0,90 en un periodo nunca visto. Esto supone un 44 % menos de error que la persistencia y un 15 % menos que una regresión lineal.</p>
+<p>La ventana de 12 horas fue la mejor en las tres arquitecturas: las ventanas más largas aportan poco contexto adicional y reducen las muestras disponibles. Las diferencias entre arquitecturas fueron pequeñas, de modo que la complejidad adicional de la LSTM profunda y de la CNN-LSTM no produjo mejoras relevantes. Por su simplicidad, ligereza y robustez, se recomienda la LSTM base.</p>
+<p>Dropout y la detención temprana fueron determinantes para evitar el sobreajuste, como demostraron los experimentos de control, y aumentar el número de neuronas no mejoró los resultados. La demanda depende principalmente del calendario (hora, fin de semana y día de la semana) y, en segundo lugar, del clima y de la demanda reciente. El principal punto débil del modelo son los días festivos.</p>
+<p>Finalmente, el modelo se desplegó en una aplicación web que permite ingresar las variables y obtener la predicción, respetando las mismas reglas de calidad de datos del entrenamiento.</p>
+</section></div><div class="pagina referencias"><section class="referencias"><h2 id="referencias">Referencias</h2>
+<p>Breiman, L. (2001). Random forests. <em>Machine Learning, 45</em>(1), 5-32. https://doi.org/10.1023/A:1010933404324</p>
+<p>Chollet, F., et al. (2015). <em>Keras</em> [Software]. https://keras.io</p>
+<p>Goodfellow, I., Bengio, Y., y Courville, A. (2016). <em>Deep learning</em>. MIT Press.</p>
+<p>Hochreiter, S., y Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation, 9</em>(8), 1735-1780. https://doi.org/10.1162/neco.1997.9.8.1735</p>
+<p>Hyndman, R. J., y Athanasopoulos, G. (2021). <em>Forecasting: Principles and practice</em> (3.ª ed.). OTexts. https://otexts.com/fpp3/</p>
+<p>Kingma, D. P., y Ba, J. (2015). Adam: A method for stochastic optimization. En <em>3rd International Conference on Learning Representations (ICLR 2015)</em>. https://arxiv.org/abs/1412.6980</p>
+<p>Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., Prettenhofer, P., Weiss, R., Dubourg, V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher, M., Perrot, M., y Duchesnay, É. (2011). Scikit-learn: Machine learning in Python. <em>Journal of Machine Learning Research, 12</em>, 2825-2830.</p>
+<p>Prechelt, L. (1998). Early stopping - but when? En G. B. Orr y K.-R. Müller (Eds.), <em>Neural networks: Tricks of the trade</em> (pp. 55-69). Springer. https://doi.org/10.1007/3-540-49430-8_3</p>
+<p>Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., y Salakhutdinov, R. (2014). Dropout: A simple way to prevent neural networks from overfitting. <em>Journal of Machine Learning Research, 15</em>(56), 1929-1958. https://jmlr.org/papers/v15/srivastava14a.html</p>
+</section></div>
+      </article>
+    </div>
   </div>
 
   <footer class="contenedor pie">Taller LSTM · Valery Nickol Rosero Molina y Johan David Delgado · <a href="https://github.com/Valery-Rosero/Red-Neuronal-App">Repositorio en GitHub</a></footer>
