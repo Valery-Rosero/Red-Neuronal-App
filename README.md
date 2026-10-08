@@ -4,7 +4,7 @@ Taller de Inteligencia Artificial: diseño, comparación y despliegue de arquite
 
 ## Informe
 
-📄 **[Informe_Taller_LSTM.pdf](Informe_Taller_LSTM.pdf)**: informe completo del taller (portada, metodología, resultados, gráficas, preguntas de análisis y conclusiones). También se puede ver y exportar a PDF desde la app: https://red-neuronal-app.vercel.app/reporte.html
+📄 **[Informe_Taller_LSTM.pdf](Informe_Taller_LSTM.pdf)**: informe completo del taller (portada, metodología, resultados, gráficas, preguntas de análisis y conclusiones). La app muestra este PDF y permite descargarlo: https://red-neuronal-app.vercel.app/reporte.html
 
 **Autores:** Valery Nickol Rosero Molina y Johan David Delgado · **Docente:** Cristian Ordoñez
 
@@ -31,7 +31,7 @@ La tabla completa (3 arquitecturas × ventanas de 12, 24 y 48 h), las gráficas,
 │   ├── modelos.py               # Arquitecturas A (LSTM base), B (LSTM profunda) y C (CNN-LSTM)
 │   ├── exportar_modelo.py       # Exporta el modelo a JSON para la app y verifica Keras vs. NumPy
 │   ├── exportar_informe.py      # Genera la página de resultados de la app desde el notebook
-│   └── generar_reporte.py       # Genera el informe formal (reporte.html) y su PDF
+│   └── generar_reporte.py       # Genera localmente el PDF desde las fuentes del informe
 ├── reporte/                     # Texto (contenido.md) y plantilla del informe
 ├── Informe_Taller_LSTM.pdf      # Informe en PDF
 ├── modelos/                     # Modelos entrenados (.keras) y modelo_produccion.keras
@@ -39,7 +39,7 @@ La tabla completa (3 arquitecturas × ventanas de 12, 24 y 48 h), las gráficas,
 └── app_vercel/                  # App web desplegable en Vercel
     ├── index.html, app.js, styles.css
     ├── informe.html, informe/   # Página de resultados y análisis (gráficas + preguntas)
-    ├── reporte.html             # Informe formal con opción de exportar a PDF
+    ├── reporte.html             # Visor estático del PDF que ya está en este directorio
     ├── historico.csv            # Histórico limpio para el modo "desde el histórico"
     ├── api/predict.py           # Función serverless: POST /api/predict
     ├── api/_motor.py            # Validación + LSTM en NumPy
@@ -63,7 +63,7 @@ Por defecto (`REENTRENAR = False`) el notebook carga los modelos ya entrenados d
 La app tiene dos páginas:
 
 - **Predicción:** permite ingresar las variables independientes (x) de las últimas 12 horas (desde el histórico, a mano o subiendo un CSV) y ver la predicción de la demanda de la hora siguiente (y).
-- **Informe** (`reporte.html`): el informe formal con portada, listo para descargar o imprimir en PDF.
+- **Informe** (`reporte.html`): muestra el PDF existente y permite descargarlo.
 - **Resultados y análisis** (`informe.html`): muestra la limpieza de datos, las arquitecturas, la tabla de resultados, todas las gráficas, el análisis de sobreajuste, los experimentos, las respuestas a las 9 preguntas y las conclusiones. Se genera desde el notebook ejecutado con `python src/exportar_informe.py`.
 
 - **Validación estricta:** si una hora tiene un dato faltante o fuera de rango físico, la app lo señala y no predice. Aplica las mismas reglas de limpieza del entrenamiento y no inventa valores.

@@ -1,4 +1,7 @@
-"""Genera el informe formal del taller (app_vercel/reporte.html) y su PDF.
+"""Genera localmente el PDF del informe usando un HTML intermedio.
+
+La página pública app_vercel/reporte.html solo muestra el PDF existente y no se
+sobrescribe al ejecutar este script.
 
 Fuentes: reporte/contenido.md (texto), reporte/plantilla.html (portada y estilos),
 el notebook ejecutado (tablas), app_vercel/informe/fig_XX.png (figuras, ver
@@ -28,6 +31,7 @@ REPO = "https://github.com/Valery-Rosero/Red-Neuronal-App"
 URL_APP = "https://red-neuronal-app.vercel.app"
 FECHA = "Octubre de 2026"
 PDF = "Informe_Taller_LSTM.pdf"
+PDF_HTML = "reporte_generado.html"
 
 md = mistune.create_markdown(plugins=["table", "strikethrough"], escape=False)
 
@@ -207,7 +211,7 @@ def capturar_y_pdf(base):
                       clip={"x": 0, "y": 0, "width": 1280, "height": min(alto + 16, 2600)}, full_page=True)
 
         doc = b.new_page()
-        doc.goto(base + "/reporte.html", wait_until="networkidle")
+        doc.goto(base + "/" + PDF_HTML, wait_until="networkidle")
         doc.wait_for_timeout(600)
         doc.evaluate("document.body.classList.add('generar-pdf')")
         pie = ('<div style="width:100%;font-family:Arial,sans-serif;font-size:11pt;color:#898781;padding:0 17mm;'
@@ -228,15 +232,18 @@ def main():
     salida = (plantilla.replace("{{CUERPO}}", cuerpo).replace("{{INDICE}}", indice)
               .replace("{{CURVA}}", curva_portada()).replace("{{REPO}}", REPO)
               .replace("{{APP}}", URL_APP).replace("{{FECHA}}", FECHA))
-    with open(os.path.join(APP, "reporte.html"), "w", encoding="utf-8") as fh:
+    html_generado = os.path.join(APP, PDF_HTML)
+    with open(html_generado, "w", encoding="utf-8") as fh:
         fh.write(salida)
-    print(f"reporte.html: {indice.count('<li>')} secciones, {n_fig} figuras, {n_tab} tablas")
+    print(f"{PDF_HTML}: {indice.count('<li>')} secciones, {n_fig} figuras, {n_tab} tablas")
 
     srv, base = servidor()
     try:
         capturar_y_pdf(base)
     finally:
         srv.shutdown()
+        if os.path.exists(html_generado):
+            os.remove(html_generado)
     from pypdf import PdfReader
     print(f"{PDF}: {len(PdfReader(os.path.join(APP, PDF)).pages)} páginas")
 
