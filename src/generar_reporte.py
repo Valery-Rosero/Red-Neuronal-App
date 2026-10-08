@@ -209,6 +209,7 @@ def capturar_y_pdf(base):
         doc = b.new_page()
         doc.goto(base + "/reporte.html", wait_until="networkidle")
         doc.wait_for_timeout(600)
+        doc.evaluate("document.body.classList.add('generar-pdf')")
         pie = ('<div style="width:100%;font-family:Arial,sans-serif;font-size:8px;color:#898781;padding:0 17mm;'
                'display:flex;justify-content:space-between"><span>Diseño de una arquitectura LSTM para predicción de '
                'demanda energética</span><span>Página <span class="pageNumber"></span> de <span class="totalPages">'

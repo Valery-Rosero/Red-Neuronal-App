@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Informe Taller LSTM</title>
-  <meta name="description" content="Informe del taller: diseÃ±o de una arquitectura LSTM para predicciÃ³n de demanda energÃ©tica. Valery Nickol Rosero Molina y Johan David Delgado.">
+  <meta name="description" content="Informe del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@
     .portada .datos .va a { color: #1c5cab; font-weight: 500; }
     .portada .datos .ancho { grid-column: 1 / -1; }
 
-    /* ---------- Ã­ndice ---------- */
+    /* ---------- índice ---------- */
     .indice h2 { margin-top: 0; }
     .indice ol { list-style: none; padding: 0; margin: 0; columns: 1; }
     .indice li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dotted #d6d5d0; font-family: "Inter", sans-serif; font-size: 10.5pt; }
@@ -75,9 +75,10 @@
       .papel p, .papel li { text-align: left; }
     }
 
-    /* ---------- impresiÃ³n / PDF ---------- */
+    /* ---------- impresión / PDF ---------- */
     @page { size: A4; margin: 18mm 17mm 20mm; }
     @media print {
+      body:not(.generar-pdf) { display: none !important; }
       :root { color-scheme: light; }
       body { background: #fff !important; }
       .nav, .barra-doc, .pie { display: none !important; }
@@ -105,8 +106,8 @@
     <div class="contenedor nav-in">
       <a class="marca" href="./"><svg class="marca-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect width="24" height="24" rx="6" fill="currentColor"/><path d="M13.2 4.5 7 13.2h4.4l-.9 6.3 6.3-8.9h-4.5z" fill="#fff"/></svg><span class="marca-txt">Demanda LSTM</span></a>
       <div class="nav-links">
-        <a href="./">PredicciÃ³n</a>
-        <a href="informe.html">Resultados y anÃ¡lisis</a>
+        <a href="./">Predicción</a>
+        <a href="informe.html">Resultados y análisis</a>
         <a href="reporte.html" class="activo" aria-current="page">Informe</a>
       </div>
     </div>
@@ -130,16 +131,16 @@
         </div>
         <div class="centro">
           <p class="tipo">Informe de taller</p>
-          <h1>DiseÃ±o de una arquitectura LSTM para predicciÃ³n de demanda energÃ©tica</h1>
-          <p class="sub">DiseÃ±o, implementaciÃ³n, comparaciÃ³n y despliegue de redes neuronales LSTM para predecir la demanda elÃ©ctrica de la hora siguiente a partir de informaciÃ³n histÃ³rica multivariada.</p>
+          <h1>Diseño de una arquitectura LSTM para predicción de demanda energética</h1>
+          <p class="sub">Diseño, implementación, comparación y despliegue de redes neuronales LSTM para predecir la demanda eléctrica de la hora siguiente a partir de información histórica multivariada.</p>
           <svg class="curva" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a78d6" stop-opacity=".18"/><stop offset="1" stop-color="#2a78d6" stop-opacity="0"/></linearGradient></defs><path d="M0.0,40.7 L3.6,39.3 L7.2,38.7 L10.8,34.5 L14.4,31.2 L18.0,28.0 L21.6,29.5 L25.1,17.5 L28.7,23.4 L32.3,25.5 L35.9,38.9 L39.5,60.5 L43.1,62.6 L46.7,45.2 L50.3,47.8 L53.9,47.6 L57.5,26.5 L61.1,33.5 L64.7,17.0 L68.3,8.4 L71.9,13.2 L75.4,14.8 L79.0,18.6 L82.6,28.6 L86.2,46.1 L89.8,28.5 L93.4,38.2 L97.0,38.1 L100.6,42.6 L104.2,29.3 L107.8,33.0 L111.4,25.9 L115.0,29.9 L118.6,34.3 L122.2,44.0 L125.7,60.4 L129.3,54.9 L132.9,53.8 L136.5,54.5 L140.1,33.4 L143.7,42.7 L147.3,21.6 L150.9,9.9 L154.5,14.1 L158.1,9.4 L161.7,24.8 L165.3,29.2 L168.9,31.0 L172.5,40.8 L176.0,38.5 L179.6,46.3 L183.2,28.7 L186.8,32.1 L190.4,29.1 L194.0,26.5 L197.6,30.7 L201.2,18.4 L204.8,30.1 L208.4,49.3 L212.0,55.8 L215.6,52.5 L219.2,54.7 L222.8,51.7 L226.3,57.6 L229.9,36.9 L233.5,28.6 L237.1,20.0 L240.7,12.3 L244.3,15.9 L247.9,30.3 L251.5,27.3 L255.1,28.4 L258.7,34.6 L262.3,33.1 L265.9,40.9 L269.5,39.2 L273.1,40.3 L276.6,40.7 L280.2,22.6 L283.8,24.2 L287.4,25.6 L291.0,24.7 L294.6,42.9 L298.2,46.7 L301.8,58.6 L305.4,48.2 L309.0,47.5 L312.6,56.3 L316.2,41.4 L319.8,25.8 L323.4,17.4 L326.9,6.0 L330.5,7.1 L334.1,23.5 L337.7,29.3 L341.3,31.1 L344.9,28.7 L348.5,33.1 L352.1,38.1 L355.7,39.3 L359.3,32.3 L362.9,29.1 L366.5,23.5 L370.1,28.7 L373.7,25.0 L377.2,30.7 L380.8,44.2 L384.4,45.6 L388.0,49.5 L391.6,56.0 L395.2,50.8 L398.8,54.1 L402.4,36.1 L406.0,16.6 L409.6,8.0 L413.2,21.1 L416.8,15.3 L420.4,19.2 L424.0,39.5 L427.5,31.4 L431.1,71.8 L434.7,65.1 L438.3,63.8 L441.9,64.9 L445.5,60.2 L449.1,65.7 L452.7,45.8 L456.3,48.1 L459.9,46.8 L463.5,48.7 L467.1,57.7 L470.7,74.0 L474.3,75.9 L477.8,70.2 L481.4,84.0 L485.0,72.7 L488.6,66.3 L492.2,50.8 L495.8,41.8 L499.4,35.8 L503.0,34.3 L506.6,49.2 L510.2,45.9 L513.8,57.0 L517.4,64.2 L521.0,64.8 L524.6,62.6 L528.1,64.4 L531.7,65.0 L535.3,56.8 L538.9,50.5 L542.5,45.0 L546.1,41.1 L549.7,55.6 L553.3,70.6 L556.9,75.2 L560.5,67.4 L564.1,68.5 L567.7,72.9 L571.3,62.1 L574.9,60.3 L578.4,46.0 L582.0,36.7 L585.6,30.8 L589.2,32.6 L592.8,50.8 L596.4,56.3 L600.0,57.3 L600,90 L0,90 Z" fill="url(#g)"/><path d="M0.0,40.7 L3.6,39.3 L7.2,38.7 L10.8,34.5 L14.4,31.2 L18.0,28.0 L21.6,29.5 L25.1,17.5 L28.7,23.4 L32.3,25.5 L35.9,38.9 L39.5,60.5 L43.1,62.6 L46.7,45.2 L50.3,47.8 L53.9,47.6 L57.5,26.5 L61.1,33.5 L64.7,17.0 L68.3,8.4 L71.9,13.2 L75.4,14.8 L79.0,18.6 L82.6,28.6 L86.2,46.1 L89.8,28.5 L93.4,38.2 L97.0,38.1 L100.6,42.6 L104.2,29.3 L107.8,33.0 L111.4,25.9 L115.0,29.9 L118.6,34.3 L122.2,44.0 L125.7,60.4 L129.3,54.9 L132.9,53.8 L136.5,54.5 L140.1,33.4 L143.7,42.7 L147.3,21.6 L150.9,9.9 L154.5,14.1 L158.1,9.4 L161.7,24.8 L165.3,29.2 L168.9,31.0 L172.5,40.8 L176.0,38.5 L179.6,46.3 L183.2,28.7 L186.8,32.1 L190.4,29.1 L194.0,26.5 L197.6,30.7 L201.2,18.4 L204.8,30.1 L208.4,49.3 L212.0,55.8 L215.6,52.5 L219.2,54.7 L222.8,51.7 L226.3,57.6 L229.9,36.9 L233.5,28.6 L237.1,20.0 L240.7,12.3 L244.3,15.9 L247.9,30.3 L251.5,27.3 L255.1,28.4 L258.7,34.6 L262.3,33.1 L265.9,40.9 L269.5,39.2 L273.1,40.3 L276.6,40.7 L280.2,22.6 L283.8,24.2 L287.4,25.6 L291.0,24.7 L294.6,42.9 L298.2,46.7 L301.8,58.6 L305.4,48.2 L309.0,47.5 L312.6,56.3 L316.2,41.4 L319.8,25.8 L323.4,17.4 L326.9,6.0 L330.5,7.1 L334.1,23.5 L337.7,29.3 L341.3,31.1 L344.9,28.7 L348.5,33.1 L352.1,38.1 L355.7,39.3 L359.3,32.3 L362.9,29.1 L366.5,23.5 L370.1,28.7 L373.7,25.0 L377.2,30.7 L380.8,44.2 L384.4,45.6 L388.0,49.5 L391.6,56.0 L395.2,50.8 L398.8,54.1 L402.4,36.1 L406.0,16.6 L409.6,8.0 L413.2,21.1 L416.8,15.3 L420.4,19.2 L424.0,39.5 L427.5,31.4 L431.1,71.8 L434.7,65.1 L438.3,63.8 L441.9,64.9 L445.5,60.2 L449.1,65.7 L452.7,45.8 L456.3,48.1 L459.9,46.8 L463.5,48.7 L467.1,57.7 L470.7,74.0 L474.3,75.9 L477.8,70.2 L481.4,84.0 L485.0,72.7 L488.6,66.3 L492.2,50.8 L495.8,41.8 L499.4,35.8 L503.0,34.3 L506.6,49.2 L510.2,45.9 L513.8,57.0 L517.4,64.2 L521.0,64.8 L524.6,62.6 L528.1,64.4 L531.7,65.0 L535.3,56.8 L538.9,50.5 L542.5,45.0 L546.1,41.1 L549.7,55.6 L553.3,70.6 L556.9,75.2 L560.5,67.4 L564.1,68.5 L567.7,72.9 L571.3,62.1 L574.9,60.3 L578.4,46.0 L582.0,36.7 L585.6,30.8 L589.2,32.6 L592.8,50.8 L596.4,56.3 L600.0,57.3" fill="none" stroke="#2a78d6" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
         </div>
         <div class="datos">
           <div class="ancho"><div class="et">Presentado por</div><div class="va">Valery Nickol Rosero Molina<br>Johan David Delgado</div></div>
-          <div><div class="et">Docente</div><div class="va">Dr. Cristian Camilo Ord&oacute;&ntilde;ez Quintero</div></div>
+          <div><div class="et">Docente</div><div class="va">Dr. Cristian Camilo Ordóñez Quintero</div></div>
           <div><div class="et">Fecha</div><div class="va">Octubre de 2026</div></div>
           <div class="ancho"><div class="et">Repositorio del proyecto (GitHub)</div><div class="va"><a href="https://github.com/Valery-Rosero/Red-Neuronal-App">https://github.com/Valery-Rosero/Red-Neuronal-App</a></div></div>
-          <div class="ancho"><div class="et">AplicaciÃ³n web</div><div class="va"><a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a></div></div>
+          <div class="ancho"><div class="et">Aplicación web</div><div class="va"><a href="https://red-neuronal-app.vercel.app">https://red-neuronal-app.vercel.app</a></div></div>
         </div>
       </div>
 
@@ -722,6 +723,6 @@
     </article>
   </div>
 
-  <footer class="contenedor pie">Taller LSTM Â· Valery Nickol Rosero Molina y Johan David Delgado Â· <a href="https://github.com/Valery-Rosero/Red-Neuronal-App">Repositorio en GitHub</a></footer>
+  <footer class="contenedor pie">Taller LSTM · Valery Nickol Rosero Molina y Johan David Delgado · <a href="https://github.com/Valery-Rosero/Red-Neuronal-App">Repositorio en GitHub</a></footer>
 </body>
 </html>

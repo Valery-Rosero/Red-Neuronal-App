@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Informe Taller LSTM</title>
-  <meta name="description" content="Informe del taller: diseÃ±o de una arquitectura LSTM para predicciÃ³n de demanda energÃ©tica. Valery Nickol Rosero Molina y Johan David Delgado.">
+  <meta name="description" content="Informe del taller: diseño de una arquitectura LSTM para predicción de demanda energética. Valery Nickol Rosero Molina y Johan David Delgado.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232a78d6' d='M13 2 4 14h7l-1 8 9-12h-7z'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@
     .portada .datos .va a { color: #1c5cab; font-weight: 500; }
     .portada .datos .ancho { grid-column: 1 / -1; }
 
-    /* ---------- Ã­ndice ---------- */
+    /* ---------- índice ---------- */
     .indice h2 { margin-top: 0; }
     .indice ol { list-style: none; padding: 0; margin: 0; columns: 1; }
     .indice li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dotted #d6d5d0; font-family: "Inter", sans-serif; font-size: 10.5pt; }
@@ -75,9 +75,10 @@
       .papel p, .papel li { text-align: left; }
     }
 
-    /* ---------- impresiÃ³n / PDF ---------- */
+    /* ---------- impresión / PDF ---------- */
     @page { size: A4; margin: 18mm 17mm 20mm; }
     @media print {
+      body:not(.generar-pdf) { display: none !important; }
       :root { color-scheme: light; }
       body { background: #fff !important; }
       .nav, .barra-doc, .pie { display: none !important; }
@@ -105,8 +106,8 @@
     <div class="contenedor nav-in">
       <a class="marca" href="./"><svg class="marca-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect width="24" height="24" rx="6" fill="currentColor"/><path d="M13.2 4.5 7 13.2h4.4l-.9 6.3 6.3-8.9h-4.5z" fill="#fff"/></svg><span class="marca-txt">Demanda LSTM</span></a>
       <div class="nav-links">
-        <a href="./">PredicciÃ³n</a>
-        <a href="informe.html">Resultados y anÃ¡lisis</a>
+        <a href="./">Predicción</a>
+        <a href="informe.html">Resultados y análisis</a>
         <a href="reporte.html" class="activo" aria-current="page">Informe</a>
       </div>
     </div>
@@ -130,16 +131,16 @@
         </div>
         <div class="centro">
           <p class="tipo">Informe de taller</p>
-          <h1>DiseÃ±o de una arquitectura LSTM para predicciÃ³n de demanda energÃ©tica</h1>
-          <p class="sub">DiseÃ±o, implementaciÃ³n, comparaciÃ³n y despliegue de redes neuronales LSTM para predecir la demanda elÃ©ctrica de la hora siguiente a partir de informaciÃ³n histÃ³rica multivariada.</p>
+          <h1>Diseño de una arquitectura LSTM para predicción de demanda energética</h1>
+          <p class="sub">Diseño, implementación, comparación y despliegue de redes neuronales LSTM para predecir la demanda eléctrica de la hora siguiente a partir de información histórica multivariada.</p>
           {{CURVA}}
         </div>
         <div class="datos">
           <div class="ancho"><div class="et">Presentado por</div><div class="va">Valery Nickol Rosero Molina<br>Johan David Delgado</div></div>
-          <div><div class="et">Docente</div><div class="va">Dr. Cristian Camilo Ord&oacute;&ntilde;ez Quintero</div></div>
+          <div><div class="et">Docente</div><div class="va">Dr. Cristian Camilo Ordóñez Quintero</div></div>
           <div><div class="et">Fecha</div><div class="va">{{FECHA}}</div></div>
           <div class="ancho"><div class="et">Repositorio del proyecto (GitHub)</div><div class="va"><a href="{{REPO}}">{{REPO}}</a></div></div>
-          <div class="ancho"><div class="et">AplicaciÃ³n web</div><div class="va"><a href="{{APP}}">{{APP}}</a></div></div>
+          <div class="ancho"><div class="et">Aplicación web</div><div class="va"><a href="{{APP}}">{{APP}}</a></div></div>
         </div>
       </div>
 
@@ -152,6 +153,6 @@
     </article>
   </div>
 
-  <footer class="contenedor pie">Taller LSTM Â· Valery Nickol Rosero Molina y Johan David Delgado Â· <a href="{{REPO}}">Repositorio en GitHub</a></footer>
+  <footer class="contenedor pie">Taller LSTM · Valery Nickol Rosero Molina y Johan David Delgado · <a href="{{REPO}}">Repositorio en GitHub</a></footer>
 </body>
 </html>
